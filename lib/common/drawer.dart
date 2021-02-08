@@ -9,6 +9,23 @@ class DrawerPage extends StatefulWidget {
 
 class _DrawerPageState extends State<DrawerPage> {
 final dbhelper = Databasehelper.instance;
+String _uname = '';
+String _uemail = '';
+
+
+@override
+void initState() {
+  // TODO: implement initState
+  fetchData();
+}
+
+void fetchData() async{
+  List userData = await dbhelper.getall();
+  setState(() {
+    _uname = userData[0]['name'];
+    _uemail = userData[0]['contact'];
+  });
+}
 
 Future<void> logout() async {
     return showDialog<void>(
@@ -53,17 +70,33 @@ Future<void> logout() async {
         padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text('global.uname'),
-            accountEmail: Text('global.emailId'),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              backgroundImage: NetworkImage('https://www.clipartmax.com/png/middle/29-291264_person-clipart-person-clip-art-image-clip-art-library-hypertext-transfer-protocol.png'),
+            accountName: Text(_uname),
+            accountEmail: Text(_uemail),
+            // currentAccountPicture: CircleAvatar(
+            //   backgroundColor: Colors.white54,
+            //   backgroundImage: NetworkImage('https://www.vnrseeds.co.in/hrims/images/LogoNew.png',scale:1),
+            // ),
+            currentAccountPicture: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.network(
+                'https://www.vnrseeds.co.in/hrims/images/LogoNew.png',
+                height: 150.0,
+                width: 100.0,
+              ),
             ),
              otherAccountsPictures: <Widget>[
-               CircleAvatar(
-                 backgroundColor: Colors.green,
-                 child: Text('X'),
-               )
+               GestureDetector(
+                 child: CircleAvatar(
+                   backgroundColor: Colors.white54,
+                   minRadius: 2.0,
+                   child: Icon(
+                     Icons.edit_outlined
+                   ),
+                 ),
+                 onTap: (){
+                   Navigator.of(context).pop();
+                 },
+               ),
              ],
           ),
           ListTile(

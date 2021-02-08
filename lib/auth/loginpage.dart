@@ -39,16 +39,17 @@ class LoginPageState extends State<LoginPage> {
   void _submit() async {
     print('_submit called');
     setState(() {
-      //loader = true;
+      loader = true;
     });
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save(); // Save our form now.
 
       String url = global.baseUrl+'login';
       Map<String, String> headers = {"Content-type": "application/json"};
-      String json = '{"contact": "'+_data.contactno +'","user_type": "'+ _data.userType +'", "password": "'+_data.password+'"}';
-      http.Response response = await http.post(url, headers: headers, body: json);
+      http.Response response = await http.post(url,body:{'contact':_data.contactno,'user_type':_data.userType,'password':_data.password});
       int statusCode = response.statusCode;
+      print(statusCode);
+      print(response.body);
       if(statusCode == 200){
           Map body = jsonDecode(response.body);
           Map<String,dynamic> row = {
@@ -63,8 +64,7 @@ class LoginPageState extends State<LoginPage> {
           });
           Navigator.pushNamed(context, '/dashboard');
       } else {
-        //_showMyDialog();
-        print('else called');
+        _showMyDialog();
       }
     }else{
       setState(() {
@@ -74,36 +74,37 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Future<void> _showMyDialog() async {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false, // user must tap button!
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Authentication Alert!'),
-  //         content: SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //               Text('Employee code or password not matched.'),
-  //               Text('Please try again.'),
-  //             ],
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           FlatButton(
-  //             child: Text('Ok'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               setState(() {
-  //                 loader = false;
-  //               });
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Authentication Alert!'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Credentials not matched.'),
+                Text('Please try again.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                //Navigator.of(context).pop();
+                Navigator.pop(context);
+                setState(() {
+                  loader = false;
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
   Future<bool> _onWillPop(){
@@ -185,6 +186,9 @@ class LoginPageState extends State<LoginPage> {
                                       if (value.isEmpty) {
                                         return 'Please enter your Contact Number';
                                       }
+                                      if( value.length != 10){
+                                        return 'Please enter valid contact no';
+                                      }
                                       return null;
                                     },
                                     onSaved: (String value) {
@@ -214,6 +218,9 @@ class LoginPageState extends State<LoginPage> {
                                     validator: (value) {
                                       if (value.isEmpty) {
                                         return 'Please enter your password';
+                                      }
+                                      if( value.length < 3){
+                                        return 'Password should have at least 4 characters';
                                       }
                                       return null;
                                     },

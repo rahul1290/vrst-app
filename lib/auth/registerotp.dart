@@ -8,15 +8,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:vrst/common/global.dart' as global;
 
-class Verifyotp extends StatefulWidget {
+class Registerotp extends StatefulWidget {
   @override
-    VerifyotpState createState() {
-    return VerifyotpState();
+  RegisterotpState createState() {
+    return RegisterotpState();
   }
 }
 
 bool loader = false;
-class VerifyotpState extends State<Verifyotp> {
+class RegisterotpState extends State<Registerotp> {
   final dbhelper = Databasehelper.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final int codeLength = 4;
@@ -32,11 +32,11 @@ class VerifyotpState extends State<Verifyotp> {
   }
 
   void _otpSubmit() async {
-    print('_otpsubmit');
+    print('_otpsubmit122');
     if(_formKey.currentState.validate()){
       _formKey.currentState.save();
 
-      String url = global.baseUrl+'login-otp';
+      String url = global.baseUrl+'registration-otp';
       print(url);
       Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_OTP});

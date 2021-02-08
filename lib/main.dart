@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:vrst/register.dart';
+import 'file:///D:/flutter_projects/vrst/lib/auth/register.dart';
 import 'package:vrst/auth/loginpage.dart';
 import 'package:vrst/auth/login_with_otp.dart';
+import 'package:vrst/auth/registerotp.dart';
 import 'package:vrst/auth/verifyotp.dart';
 import 'package:vrst/dashboard.dart';
 import 'package:vrst/dbhelper.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/loginwithotp' : (context) => Loginwithotp(),
         '/verifyotp': (context) => Verifyotp(),
         '/register': (context) => Register(),
+        '/registerotp' : (context) => Registerotp(),
         '/dashboard' : (context) =>  Dashboard(),
         '/purchase' : (context) => Purchase(),
       },
