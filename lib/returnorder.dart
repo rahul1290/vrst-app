@@ -10,13 +10,13 @@ import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
 
-class Purchase extends StatefulWidget {
+class ReturnOrder extends StatefulWidget {
   @override
-  _PurchaseState createState() => _PurchaseState();
+  _ReturnOrderState createState() => _ReturnOrderState();
 }
 
 
-class _PurchaseState extends State<Purchase> {
+class _ReturnOrderState extends State<ReturnOrder> {
   final _formKey = GlobalKey<FormState>();
   String stateDropdownValue = 'Select State';
   String distributorDropdownValue = 'Select Distributor';
@@ -33,30 +33,20 @@ class _PurchaseState extends State<Purchase> {
 
   void initState() {
     _getstates();
-    _getdistributors();
     super.initState();
   }
 
   void _getstates() async{
-    String url = global.baseUrl + 'get-states';
+    print('getstates function called.');
+    String url = global.baseUrl + 'get-bill';
     http.Response resposne = await http.get(url);
     int statusCode = resposne.statusCode;
+    print(statusCode);
     if(statusCode == 200){
       setState(() {
         _states = jsonDecode(resposne.body);
-        stateDropdownValue = _states[0]['state_code'];
-      });
-    }
-  }
-
-  void _getdistributors() async{
-    String url = global.baseUrl + 'get-distributors';
-    http.Response resposne = await http.get(url);
-    int statusCode = resposne.statusCode;
-    if(statusCode == 200){
-      setState(() {
-        _distributor = jsonDecode(resposne.body);
-        distributorDropdownValue = _distributor[0]['DealerId'];
+        stateDropdownValue = _states[0]['bill_id'];
+        print(_states);
       });
     }
   }
@@ -109,11 +99,11 @@ class _PurchaseState extends State<Purchase> {
         });
   }
 
-  @override
-  void dispose() {
-    _billController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _billController.dispose();
+  //   super.dispose();
+  // }
 
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -172,7 +162,7 @@ class _PurchaseState extends State<Purchase> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PURCHASE ORDER'),
+        title: Text('RETURN ORDER'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -192,11 +182,11 @@ class _PurchaseState extends State<Purchase> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         DropdownButtonFormField(
-                          hint: Text('Select State'),
+                            hint: Text('Select Your Order'),
                             items: _states.map((item) {
                               return DropdownMenuItem<String>(
-                                value: item['state_code'].toString(),
-                                child: Text(item['state_name']),
+                                value: item['bill_id'].toString(),
+                                child: Text(item['bill_no']),
                               );
                             }).toList(),
                             onChanged: (String newValue) {
@@ -213,105 +203,32 @@ class _PurchaseState extends State<Purchase> {
                         SizedBox(
                           height: 10.0,
                         ),
-                        DropdownButtonFormField(
-                            hint: Text('Select Distributor'),
-                            items: _distributor.map((item) {
-                              return DropdownMenuItem<String>(
-                                value: item['DealerId'].toString(),
-                                child: Text(item['DealerName']),
-                              );
-                            }).toList(),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                distributorDropdownValue = newValue;
-                              });
-                            },
-                            validator: (value){
-                              if(value != 0){
-                                return 'Please select Distributor';
-                              }
-                            },
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: 'Enter Bill Number',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide(
-                                color: Colors.blue,
-                              ),
+
+                        RaisedButton(
+                            color: Colors.lightGreen,
+                            splashColor: Colors.red,
+                            child: Text(
+                              'SEARCH',
+                              style:
+                              TextStyle(color: Colors.white, fontSize: 16),
                             ),
-                          ),
-                          validator: (value){
-                            if(value.isEmpty){
-                              return 'Please enter Bill no.';
-                            }
-                          },
+                            onPressed: _submit
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              child: new Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: _buildLeaveFrom(),
-                              ),
-                            ),
-                            Expanded(
-                              child: new Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    _showPicker(context);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 25,
-                                    backgroundColor: Color(0xffFDCF09),
-                                    child: _image != null
-                                        ? ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(50),
-                                            child: Image.file(
-                                              _image,
-                                              width: 120,
-                                              height: 120,
-                                              fit: BoxFit.fitHeight,
-                                            ),
-                                          )
-                                        : Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius:
-                                                    BorderRadius.circular(50)),
-                                            width: 100,
-                                            height: 100,
-                                            child: Icon(
-                                              Icons.camera_alt,
-                                              color: Colors.grey[800],
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+
                         ..._getFriends(),
                         SizedBox(
                           height: 10,
                         ),
                         RaisedButton(
-                            color: Colors.lightGreen,
+                            color: Color(0xFFf09a3e),
                             splashColor: Colors.red,
                             child: Text(
-                              'SUBMIT',
+                              'UPDATE',
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
+                              TextStyle(color: Colors.white, fontSize: 16),
                             ),
-                            onPressed: _submit),
+                            onPressed: _submit
+                        ),
                       ],
                     ),
                   ),
@@ -331,15 +248,15 @@ class _PurchaseState extends State<Purchase> {
       friendsTextFields.add(Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Row(
-            children: [
-              Expanded(child: CropTextFields(i)),
-              Expanded(child: CropTypeTextFields(i)),
-              Expanded(child: CropQuantityTextFields(i)),
-              //SizedBox(width: 16,),
-              // we need add button at last friends row
-              _addRemoveButton(i == friendsList.length - 1, i),
-            ],
-          ),
+          children: [
+            Expanded(child: CropTextFields(i)),
+            Expanded(child: CropTypeTextFields(i)),
+            Expanded(child: CropQuantityTextFields(i)),
+            //SizedBox(width: 16,),
+            // we need add button at last friends row
+            _addRemoveButton(i == friendsList.length - 1, i),
+          ],
+        ),
       ));
     }
     return friendsTextFields;
@@ -413,7 +330,7 @@ class _CropTextFieldsState extends State<CropTextFields> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropController.text = _PurchaseState.friendsList[widget.index] ?? '';
+      _cropController.text = _ReturnOrderState.friendsList[widget.index] ?? '';
     });
 
     return DropdownButton<String>(
@@ -474,7 +391,7 @@ class _CropTypeTextFieldsState extends State<CropTypeTextFields> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropTypeController.text = _PurchaseState.friendsList[widget.index] ?? '';
+      _cropTypeController.text = _ReturnOrderState.friendsList[widget.index] ?? '';
     });
     String dropdownValue = 'Variety';
 
@@ -539,12 +456,12 @@ class _CropQuantityTextFieldsState extends State<CropQuantityTextFields> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropQuantityController.text = _PurchaseState.friendsList[widget.index] ?? '';
+      _cropQuantityController.text = _ReturnOrderState.friendsList[widget.index] ?? '';
     });
 
     return TextFormField(
       controller: _cropQuantityController,
-      onChanged: (v) => _PurchaseState.friendsList[widget.index] = v,
+      onChanged: (v) => _ReturnOrderState.friendsList[widget.index] = v,
       decoration: InputDecoration(
           hintText: 'Qty(gm)'
       ),
@@ -590,12 +507,12 @@ class _FriendTextFieldsState extends State<FriendTextFields> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _nameController.text = _PurchaseState.friendsList[widget.index] ?? '';
+      _nameController.text = _ReturnOrderState.friendsList[widget.index] ?? '';
     });
 
     return TextFormField(
       controller: _nameController,
-      onChanged: (v) => _PurchaseState.friendsList[widget.index] = v,
+      onChanged: (v) => _ReturnOrderState.friendsList[widget.index] = v,
       decoration: InputDecoration(hintText: 'Enter your friend\'s name'),
       validator: (v) {
         if (v.trim().isEmpty) return 'Please enter something';

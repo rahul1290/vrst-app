@@ -171,7 +171,7 @@ class LoginPageState extends State<LoginPage> {
                                   TextFormField(
                                     key: Key('username'),
                                     decoration: InputDecoration(
-                                      icon: Icon(Icons.person,color:Colors.grey,),
+                                      icon: Icon(Icons.mobile_friendly_sharp,color:Colors.grey,),
                                       fillColor: Colors.blue,
                                       labelStyle: TextStyle(
                                         color: Colors.black,

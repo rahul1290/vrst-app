@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:code_fields/code_fields.dart';
 import 'package:vrst/dbhelper.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+//import 'dart:io';
 import 'package:vrst/common/global.dart' as global;
 
 class Registerotp extends StatefulWidget {
@@ -38,7 +38,7 @@ class RegisterotpState extends State<Registerotp> {
 
       String url = global.baseUrl+'registration-otp';
       print(url);
-      Map<String, String> headers = {"Content-type": "application/json"};
+      //Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_OTP});
       int statusCode = response.statusCode;
       print(statusCode);

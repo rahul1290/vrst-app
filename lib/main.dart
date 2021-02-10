@@ -8,6 +8,7 @@ import 'package:vrst/auth/verifyotp.dart';
 import 'package:vrst/dashboard.dart';
 import 'package:vrst/dbhelper.dart';
 import 'package:vrst/purchase.dart';
+import 'package:vrst/returnorder.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/registerotp' : (context) => Registerotp(),
         '/dashboard' : (context) =>  Dashboard(),
         '/purchase' : (context) => Purchase(),
+        '/returnOrder' : (context) => ReturnOrder(),
       },
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:vrst/common/global.dart' as global;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+//import 'dart:io';
 
 class Register extends StatefulWidget {
   @override
@@ -23,16 +23,35 @@ bool loader = false;
 class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
   _RegisterData _data = new _RegisterData();
-  String dropdownValue = 'chhattisgarh';
+  String dropdownValue;
+  List _states= List();
+  @override
+  void initState() {
+    _getstates();
+    super.initState();
+  }
+
+  void _getstates() async{
+    print('fucntion called');
+    String url = global.baseUrl + 'get-states';
+    http.Response resposne = await http.get(url);
+    int statusCode = resposne.statusCode;
+    if(statusCode == 200){
+      setState(() {
+        _states = jsonDecode(resposne.body);
+        dropdownValue = _states[0]['state_code'];
+      });
+    }
+  }
 
   void _submit() async{
-    print('_submit called123');
+    print('_submit called');
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
 
       String url = global.baseUrl+'registration';
       Map<String, String> headers = {"Content-type": "application/json"};
-      http.Response response = await http.post(url,body:{'state_id':'1','name':_data.name,'contact':_data.contact,'password':_data.password,'email':_data.email,'pan':_data.pan});
+      http.Response response = await http.post(url,body:{'state_id':_data.state,'name':_data.name,'contact':_data.contact,'password':_data.password,'email':_data.email,'pan':_data.pan});
       int statusCode = response.statusCode;
       print(statusCode);
       print(response.body);
@@ -69,25 +88,39 @@ class _RegisterState extends State<Register> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         
-                        DropdownButton<String>(
-                          key: Key('state'),
-                          value: dropdownValue ?? null,
-                          onChanged: (String newValue) {
-                            setState(() {
-                              dropdownValue = newValue;
-                              this._data.state = newValue;
-                            });
-                          },
-                          isExpanded: true,
-                          hint: Text('Select State'),
-                          items: <String>['chhattisgarh', 'madhya pradesh']
-                            .map<DropdownMenuItem<String>>((String value) {
+                        // DropdownButton<String>(
+                        //   key: Key('state'),
+                        //   value: dropdownValue ?? null,
+                        //   onChanged: (String newValue) {
+                        //     setState(() {
+                        //       dropdownValue = newValue;
+                        //       this._data.state = newValue;
+                        //     });
+                        //   },
+                        //   isExpanded: true,
+                        //   hint: Text('Select State'),
+                        //   items: _states.map((item) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: item['state_code'].toString(),
+                        //         child: Text(item['state_name']),
+                        //       );
+                        //     }).toList(),
+                        // ),
+
+                        DropdownButtonFormField(
+                            hint: Text('Select State'),
+                            items: _states.map((item) {
                               return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
+                                value: item['state_code'].toString(),
+                                child: Text(item['state_name']),
                               );
-                            })
-                            .toList(),
+                            }).toList(),
+                            onChanged: (String newValue) {
+                              setState(() {
+                                dropdownValue = newValue;
+                                this._data.state = newValue;
+                              });
+                            },
                         ),
 
                         TextFormField(

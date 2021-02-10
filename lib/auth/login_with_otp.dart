@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:convert';
-import 'dart:io';
+//import 'dart:convert';
+//import 'dart:io';
 import 'package:vrst/common/global.dart' as global;
 import 'package:http/http.dart' as http;
 
@@ -35,13 +35,13 @@ class LoginwithotpState extends State<Loginwithotp> {
       _formKey.currentState.save(); // Save our form now.
 
       String url = global.baseUrl+'generate-otp';
-      Map<String, String> headers = {"Content-type": "application/json"};
+      //Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'contact':_mobileNo});
       int statusCode = response.statusCode;
       // print(statusCode);
       // print(response.body);
       if(statusCode == 200){
-        Map body = jsonDecode(response.body);
+        //Map body = jsonDecode(response.body);
         global.contactNo = _mobileNo;
         setState(() {
           loader = true;
