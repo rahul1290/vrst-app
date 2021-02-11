@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vrst/common/global.dart' as global;
@@ -17,6 +18,7 @@ class _RegisterData{
   String password = '';
   String email = '';
   String pan = '';
+  String address = '';
 }
 
 bool loader = false;
@@ -106,26 +108,10 @@ class _RegisterState extends State<Register> {
                         //       );
                         //     }).toList(),
                         // ),
-
-                        DropdownButtonFormField(
-                            hint: Text('Select State'),
-                            items: _states.map((item) {
-                              return DropdownMenuItem<String>(
-                                value: item['state_code'].toString(),
-                                child: Text(item['state_name']),
-                              );
-                            }).toList(),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                dropdownValue = newValue;
-                                this._data.state = newValue;
-                              });
-                            },
-                        ),
-
                         TextFormField(
                           key: Key('retailername'),
                           decoration: InputDecoration(
+                            icon: Icon(Icons.person,color:Colors.grey,),
                             labelText: 'Enter Retailer Name',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
@@ -135,7 +121,6 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                           validator: (value){
-                            print(value);
                             if(value.isEmpty){
                               return 'Please enter ratailer name.';
                             }
@@ -154,6 +139,7 @@ class _RegisterState extends State<Register> {
                           key: Key('contactno'),
                           decoration: InputDecoration(
                             labelText: 'Enter Contact Number',
+                            icon: Icon(Icons.mobile_friendly_sharp,color:Colors.grey,),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide: BorderSide(
@@ -181,6 +167,7 @@ class _RegisterState extends State<Register> {
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Enter Password',
+                            icon: Icon(Icons.vpn_key,color:Colors.grey,),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide: BorderSide(
@@ -203,9 +190,63 @@ class _RegisterState extends State<Register> {
                         SizedBox(
                           height: 10,
                         ),
+                        DropdownButtonFormField(
+                            hint: Text('Select State'),
+                            decoration: InputDecoration(
+                              icon: Icon(Icons.person,color:Colors.grey,),
+                            ),
+                            items: _states.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item['state_code'].toString(),
+                                child: Text(item['state_name']),
+                              );
+                            }).toList(),
+                            onChanged: (String newValue) {
+                              setState(() {
+                                dropdownValue = newValue;
+                                this._data.state = newValue;
+                              });
+                            },
+                            onSaved: (String newValue){
+                              setState((){
+                                this._data.state = newValue;
+                              });
+                            },  
+                            validator: (newValue){
+                              print(newValue);
+                              if(newValue == 0 || newValue == ''){
+                                return 'Please select state.';
+                              }
+                            },
+                        ),
+                        SizedBox(height: 10.0,),
+                        TextFormField(
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            labelText: 'Address',
+                            icon: Icon(Icons.place,color:Colors.grey,),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: BorderSide(
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ),
+                          validator: (value){
+                            if(value.isEmpty){
+                                return 'Please enter Address.';
+                            }
+                          },
+                          onSaved: (String value){
+                            this._data.address = value;
+                          },
+                          keyboardType: TextInputType.multiline,
+                        ),
+                        SizedBox(height: 10.0,),
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Enter EmailID (Optional)',
+                            icon: Icon(Icons.mail,color:Colors.grey,),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide: BorderSide(
@@ -224,6 +265,7 @@ class _RegisterState extends State<Register> {
                         TextFormField(
                           decoration: InputDecoration(
                             labelText: 'Enter PAN/Aadhar (Optional)',
+                            icon: Icon(Icons.credit_card,color:Colors.grey,),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide: BorderSide(
