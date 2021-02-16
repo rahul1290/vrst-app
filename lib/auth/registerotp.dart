@@ -46,6 +46,7 @@ class RegisterotpState extends State<Registerotp> {
         Map body = jsonDecode(response.body);
         Map<String,dynamic> row = {
           Databasehelper.columnName : body['user_name'],
+          Databasehelper.columnState : body['state_id'],
           Databasehelper.columnContact : body['contact_no'],
           Databasehelper.columnkey : body['token'],
           Databasehelper.columnimage : '',

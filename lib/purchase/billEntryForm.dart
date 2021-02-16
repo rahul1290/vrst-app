@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:vrst/dbhelper.dart';
 
 class BillEntryForm extends StatefulWidget {
   @override
@@ -29,6 +30,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
   var varietyDropDown = <TextEditingController>[];
   var qty = <TextEditingController>[];
   var cards = <Card>[];
+  final dbhelper = Databasehelper.instance;
+  String _ustate;
 
   List _distributor = List();
   _FormData _data = new _FormData();
@@ -91,10 +94,18 @@ class _BillEntryFormState extends State<BillEntryForm> {
   @override
   void initState() {
     super.initState();
-    _getdistributors();
+    fetchData();
     _billDate = TextEditingController();
     cards.add(createCard());
   }
+
+  void fetchData() async{
+  List userData = await dbhelper.getall();
+  setState(() {
+    _ustate = userData[0]['state'];
+  });
+  _getdistributors();
+}
 
   void _submit() async {
     if (this._formKey.currentState.validate()) {
@@ -113,7 +124,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
   }
 
   void _getdistributors() async {
-    String url = global.baseUrl + 'get-distributors';
+    String url = global.baseUrl + 'get-distributors/'+ _ustate;
+    print(url);
     http.Response resposne = await http.get(url);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {

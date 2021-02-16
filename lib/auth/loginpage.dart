@@ -55,6 +55,7 @@ class LoginPageState extends State<LoginPage> {
           Map<String,dynamic> row = {
             Databasehelper.columnName : body['user_name'],
             Databasehelper.columnContact : body['contact_no'],
+            Databasehelper.columnState : body['state_id'],
             Databasehelper.columnkey : body['token'],
             Databasehelper.columnimage : '',
           };

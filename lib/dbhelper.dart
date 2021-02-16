@@ -11,6 +11,7 @@ class Databasehelper {
 
   static final columnID = 'id';
   static final columnName = 'name';
+  static final columnState = 'state';
   static final columnContact = 'contact';
   static final columnkey = 'key';
   static final columnimage = 'image';
@@ -39,6 +40,7 @@ class Databasehelper {
         CREATE TABLE $table(
           $columnID INTEGER PRIMARY KEY,
           $columnName TEXT NOT NULL,
+          $columnState TEXT NOT NULL,
           $columnContact VARCHAR(11) NOT NULL,
           $columnkey TEXT NOT NULL,
           $columnimage TEXT NOT NULL
@@ -56,7 +58,7 @@ class Databasehelper {
 
   Future<List>getall() async {
     Database db = await instance.databse;
-    return await db.query(table, columns: [columnID,columnName,columnContact,columnkey,columnimage]);
+    return await db.query(table, columns: [columnID,columnName,columnState,columnContact,columnkey,columnimage]);
   }
 
   Future<List>get(int id) async {
