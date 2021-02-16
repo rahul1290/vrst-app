@@ -9,12 +9,12 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
+import 'package:vrst/purchase/billEntryForm.dart';
 
 class Purchase extends StatefulWidget {
   @override
   _PurchaseState createState() => _PurchaseState();
 }
-
 
 class _PurchaseState extends State<Purchase> {
   final _formKey = GlobalKey<FormState>();
@@ -131,8 +131,40 @@ class _PurchaseState extends State<Purchase> {
   void _submit() {
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
+      _purchaseSuccess();
     }
-    print(_PurchaseState.friendsList);
+  }
+
+  Future<void> _purchaseSuccess() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Purchase Success!',textAlign: TextAlign.center,),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You successfully Submit the purchase order.',textAlign: TextAlign.center,),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                //Navigator.of(context).pop();
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/dashboard');
+                setState(() {
+                  //loader = false;
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _billDateWidget() {
@@ -196,28 +228,6 @@ class _PurchaseState extends State<Purchase> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // DropdownButtonFormField(
-                        //   hint: Text('Select State'),
-                        //     items: _states.map((item) {
-                        //       return DropdownMenuItem<String>(
-                        //         value: item['state_code'].toString(),
-                        //         child: Text(item['state_name']),
-                        //       );
-                        //     }).toList(),
-                        //     onChanged: (String newValue) {
-                        //       setState(() {
-                        //         stateDropdownValue = newValue;
-                        //       });
-                        //     },
-                        //     validator: (value){
-                        //       if(value != 0){
-                        //         return 'Please select State';
-                        //       }
-                        //     }
-                        // ),
-                        // SizedBox(
-                        //   height: 10.0,
-                        // ),
                         DropdownButtonFormField(
                             hint: Text('Select Distributor'),
                             items: _distributor.map((item) {
@@ -230,11 +240,6 @@ class _PurchaseState extends State<Purchase> {
                               setState(() {
                                 distributorDropdownValue = newValue;
                               });
-                            },
-                            validator: (value){
-                              if(value != 0){
-                                return 'Please select Distributor';
-                              }
                             },
                         ),
                         SizedBox(
@@ -309,10 +314,12 @@ class _PurchaseState extends State<Purchase> {
                             )
                           ],
                         ),
-                        ..._billEntry(),
                         SizedBox(
                           height: 10,
                         ),
+
+                        BillEntryForm(),
+
                         RaisedButton(
                             color: Colors.lightGreen,
                             splashColor: Colors.red,
@@ -331,239 +338,6 @@ class _PurchaseState extends State<Purchase> {
           ),
         ),
       ),
-    );
-  }
-
-  /// get firends text-fields
-  List<Widget> _billEntry() {
-    List<Widget> friendsTextFields = [];
-    for (int i = 0; i < friendsList.length; i++) {
-      friendsTextFields.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Card(
-          //color: Color(0xFFccccccc9),
-          shadowColor: Color(0xFFf09a3e),
-            elevation: 5.0,
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.0,right: 10.0),
-              child: Column(
-                children: [
-                  CropTextFields(i),
-                  CropTypeTextFields(i),
-                  CropQuantityTextFields(i),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                          padding: EdgeInsets.only(top:15.0,bottom: 15.0),
-                          child: _addRemoveButton(i == friendsList.length - 1, i),
-                      )
-
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ));
-    }
-    return friendsTextFields;
-  }
-
-  Widget _addRemoveButton(bool add, int index) {
-    return InkWell(
-      onTap: () {
-        if (add) {
-          // add new text-fields at the top of all friends textfields
-          friendsList.insert(0, null);
-        } else
-          friendsList.removeAt(index);
-        setState(() {});
-      },
-      child: Container(
-        width: 23,
-        height: 23,
-        decoration: BoxDecoration(
-          color: (add) ? Colors.green : Colors.red,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Icon(
-          (add) ? Icons.add : Icons.remove,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}
-
-
-class CropTextFields extends StatefulWidget {
-  final int index;
-  CropTextFields(this.index);
-
-  @override
-  _CropTextFieldsState createState() => _CropTextFieldsState();
-}
-
-class _CropTextFieldsState extends State<CropTextFields> {
-  TextEditingController _cropController;
-  String cropDropdownValue = 'Crop';
-  List _crop = List();
-
-  @override
-  void initState() {
-    super.initState();
-    _getcrop();
-    _cropController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _cropController.dispose();
-    super.dispose();
-  }
-
-  void _getcrop() async{
-    String url = global.baseUrl + 'get-cropList';
-    http.Response resposne = await http.get(url);
-    int statusCode = resposne.statusCode;
-    if(statusCode == 200){
-      setState(() {
-        _crop = jsonDecode(resposne.body);
-        cropDropdownValue = _crop[0]['crop_id'];
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropController.text = _PurchaseState.friendsList[widget.index] ?? '';
-    });
-
-    return DropdownButton<String>(
-      value: cropDropdownValue,
-      onChanged: (String newValue) {
-        setState(() {
-          cropDropdownValue = newValue;
-        });
-      },
-      isExpanded: true,
-      items: _crop.map((item) {
-        return DropdownMenuItem<String>(
-          value: item['crop_code'].toString(),
-          child: Text(item['crop_name']),
-        );
-      }).toList(),
-    );
-  }
-}
-
-
-class CropTypeTextFields extends StatefulWidget {
-  final int index;
-  CropTypeTextFields(this.index);
-  @override
-  _CropTypeTextFieldsState createState() => _CropTypeTextFieldsState();
-}
-
-class _CropTypeTextFieldsState extends State<CropTypeTextFields> {
-  TextEditingController _cropTypeController;
-  String cropDropdownValue = 'Variety';
-  List _cropVariety = List();
-
-  @override
-  void initState() {
-    super.initState();
-    _getcropVariety();
-    _cropTypeController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _cropTypeController.dispose();
-    super.dispose();
-  }
-
-  void _getcropVariety() async{
-    String url = global.baseUrl + 'get-cropvariety';
-    http.Response resposne = await http.get(url);
-    int statusCode = resposne.statusCode;
-    if(statusCode == 200){
-      setState(() {
-        _cropVariety = jsonDecode(resposne.body);
-        cropDropdownValue = _cropVariety[0]['crop_variety_id'];
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropTypeController.text = _PurchaseState.friendsList[widget.index] ?? '';
-    });
-    return DropdownButtonFormField(
-        hint: Text('Select Variety'),
-        isExpanded: true,
-        items: <String>['Variety','One', 'Two', 'Free', 'Four']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (String newValue) {
-          setState(() {
-            null;
-          });
-        }
-    );
-  }
-}
-
-
-class CropQuantityTextFields extends StatefulWidget {
-  final int index;
-  CropQuantityTextFields(this.index);
-  @override
-  _CropQuantityTextFieldsState createState() => _CropQuantityTextFieldsState();
-}
-
-class _CropQuantityTextFieldsState extends State<CropQuantityTextFields> {
-  TextEditingController _cropQuantityController;
-
-  @override
-  void initState() {
-    super.initState();
-    _cropQuantityController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _cropQuantityController.dispose();
-    super.dispose();
-  }
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _cropQuantityController.text = _PurchaseState.friendsList[widget.index] ?? '';
-    });
-
-    return TextFormField(
-      controller: _cropQuantityController,
-      onChanged: (v) => _PurchaseState.friendsList[widget.index] = v,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        fillColor: Colors.blue,
-        labelStyle: TextStyle(
-          color: Colors.black,
-        ),
-        labelText: 'Qty(gm)',
-      ),
-      validator: (v) {
-        if (v.trim().isEmpty) return 'Qunatity';
-        return null;
-      },
     );
   }
 }

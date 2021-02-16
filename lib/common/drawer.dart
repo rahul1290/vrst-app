@@ -111,7 +111,7 @@ Future<void> logout() async {
             leading: Icon(Icons.add_shopping_cart_outlined,color: Colors.green,),
             title: Text('Purchase Order'),
             onTap: (){
-              Navigator.pushNamed(context, '/purchase');
+              Navigator.pushNamed(context, '/billEntryForm');
             },
           ),
           ListTile(

@@ -76,7 +76,7 @@ class _DashboardState extends State<Dashboard> {
           Align(
             alignment: Alignment.center,
             child: Text(
-              "HYBRID CHILLI SCEHEME",
+              "HYBRID CHILLI SCHEME",
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 20.0,
