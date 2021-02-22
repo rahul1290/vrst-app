@@ -7,9 +7,11 @@ import 'package:vrst/auth/registerotp.dart';
 import 'package:vrst/auth/verifyotp.dart';
 import 'package:vrst/dashboard.dart';
 import 'package:vrst/dbhelper.dart';
+import 'package:vrst/purchase/OrderList.dart';
 import 'package:vrst/purchase/Purchase.dart';
-import 'package:vrst/returnorder.dart';
+import 'file:///D:/flutter_projects/vrst/lib/purchase/returnorder.dart';
 import 'package:vrst/purchase/billEntryForm.dart';
+import 'package:vrst/auth/profile.dart';
 
 void main() => runApp(MyApp());
 
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
         '/purchase' : (context) => Purchase(),
         '/returnOrder' : (context) => ReturnOrder(),
         '/billEntryForm' : (context) => BillEntryForm(),
+        '/profile' : (context) => Profilepage(),
+        '/orderList' : (context) => OrderList(),
       },
     );
   }

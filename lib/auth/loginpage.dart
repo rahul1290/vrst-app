@@ -37,7 +37,6 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _submit() async {
-    print('_submit called');
     setState(() {
       loader = true;
     });
@@ -48,8 +47,6 @@ class LoginPageState extends State<LoginPage> {
       Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'contact':_data.contactno,'user_type':_data.userType,'password':_data.password});
       int statusCode = response.statusCode;
-      print(statusCode);
-      print(response.body);
       if(statusCode == 200){
           Map body = jsonDecode(response.body);
           Map<String,dynamic> row = {

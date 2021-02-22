@@ -93,9 +93,7 @@ Future<void> logout() async {
                      Icons.edit_outlined
                    ),
                  ),
-                 onTap: (){
-                   Navigator.of(context).pop();
-                 },
+                 onTap: () => Navigator.pushReplacementNamed(context, "/profile"),
                ),
              ],
           ),
@@ -112,6 +110,13 @@ Future<void> logout() async {
             title: Text('Purchase Order'),
             onTap: (){
               Navigator.pushNamed(context, '/billEntryForm');
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.add_shopping_cart_outlined,color: Colors.green,),
+            title: Text('OrderList'),
+            onTap: (){
+              Navigator.pushNamed(context, '/orderList');
             },
           ),
           ListTile(

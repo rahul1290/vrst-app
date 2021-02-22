@@ -5,68 +5,34 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
+import 'package:vrst/purchase/OrderDetail.dart';
 import 'package:vrst/schemeDetail.dart';
 
-class Dashboard extends StatefulWidget {
+class OrderList extends StatefulWidget {
   @override
-  _DashboardState createState() => _DashboardState();
+  _OrderListState createState() => _OrderListState();
 }
 
-class _DashboardState extends State<Dashboard> {
-  List _schemes = List();
+class _OrderListState extends State<OrderList> {
+  List _orders = List();
   final dbhelper = Databasehelper.instance;
   bool loader = true;
-
-  Future<bool> _onWillPop() {
-    return showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
-              'Want to exit?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-            ),
-            //content: new Text('',style:TextStyle(fontSize: 16),),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => exit(0),
-                child: Text(
-                  'Yes',
-                  style: TextStyle(
-                      color: Color(0xFFf09a3e),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
-                ),
-              ),
-              FlatButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text('No'),
-                color: Colors.green,
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
 
   @override
   void initState() {
     super.initState();
-    _getSchemes();
+    _getOders();
   }
 
-  void _getSchemes() async {
+  void _getOders() async {
     List<dynamic> userdetail = await dbhelper.get(1);
-    String url = global.baseUrl + 'all-scheme/' + userdetail[0]['state'];
-    print(url);
-    http.Response resposne = await http.get(url);
+    Map<String, String> headers = {"Content-type": "application/json","vrstKey": userdetail[0]['key']};
+    String url = global.baseUrl + 'Purchase_ctrl/my_order';
+    http.Response resposne = await http.get(url,headers: headers);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
-        _schemes = jsonDecode(resposne.body);
+        _orders = jsonDecode(resposne.body);
         loader = false;
       });
     }
@@ -74,14 +40,12 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
-          title: Text('DASHBOARD'),
+          title: Text('Order List'),
           centerTitle: true,
         ),
-        drawer: DrawerPage(),
+        //drawer: DrawerPage(),
         body: loader ? Container(
           child: Center(
             child: Column(
@@ -95,7 +59,7 @@ class _DashboardState extends State<Dashboard> {
           ),
           //child: CircularProgressIndicator(),
         ) : ListView.builder(
-          itemCount: _schemes.length,
+          itemCount: _orders.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(top:4.0),
@@ -103,14 +67,12 @@ class _DashboardState extends State<Dashboard> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: CircleAvatar(
-                        child: Text(_schemes[index]['heading'].substring(0, 1)),
-                      ),
+                      // leading: CircleAvatar(
+                      //   child: Text(_orders[index]['bill_no'].substring(0, 1)),
+                      // ),
                       //trailing: Icon(Icons.arrow_forward_ios_sharp),
-                      title: Text(_schemes[index]['heading']),
-                      subtitle: Text(_schemes[index]['subheading'].length > 100
-                          ? _schemes[index]['subheading'].substring(0, 100)
-                          : _schemes[index]['subheading']),
+                      title: Text("Bill No.: " + _orders[index]['bill_no']),
+                      subtitle: Text("Distributor: "+ _orders[index]['DealerName'] + "\nOrder Date: "+ _orders[index]['created_at']+"\nStatus: "+_orders[index]['bill_status']),
                     ),
                     ButtonBar(
                       children: [
@@ -125,11 +87,11 @@ class _DashboardState extends State<Dashboard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SchemeDetail(_schemes[index]['scheme_id'].toString())),
-                              );
+                                  builder: (context) => OrderDetail(_orders[index]['bill_id'].toString())),
+                            );
                           },
                         ),
-                       
+
                       ],
                     ),
                   ],
@@ -138,7 +100,6 @@ class _DashboardState extends State<Dashboard> {
             );
           },
         ),
-      ),
-    );
+      );
   }
 }

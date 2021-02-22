@@ -4,8 +4,9 @@ class BillEntry {
   final String quantity;
 
   BillEntry(this.crop,this.variety, this.quantity);
+
   @override
   String toString() {
-    return 'BillEntry: crop = $crop, variety= $variety, quantity= $quantity';
+    return 'crop = $crop, variety= $variety, quantity= $quantity';
   }
 }

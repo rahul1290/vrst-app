@@ -36,7 +36,8 @@ dependencies:
   path_provider: ^1.6.27
   flutter_launcher_icons: ^0.8.1
   flutter_launcher_name: ^0.0.1
-  folding_cell: "^1.0.0"
+  json_table: ^1.4.0
+  flutter_html: ^1.2.0
 
 dev_dependencies:
   flutter_test:

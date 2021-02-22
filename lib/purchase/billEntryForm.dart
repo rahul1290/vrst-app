@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vrst/purchase/bilEntry.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vrst/common/global.dart' as global;
@@ -32,13 +33,17 @@ class _BillEntryFormState extends State<BillEntryForm> {
   var cards = <Card>[];
   final dbhelper = Databasehelper.instance;
   String _ustate;
+  bool loader = true;
 
   List _distributor = List();
+  List _crop = List();
+  List _cropVariety = List();
+
   _FormData _data = new _FormData();
   TextEditingController _billDate;
   final picker = ImagePicker();
 
-  Card createCard() {
+  Card createCard(int l) {
     var cropController = TextEditingController();
     var varietyController = TextEditingController();
     var qtyController = TextEditingController();
@@ -47,44 +52,71 @@ class _BillEntryFormState extends State<BillEntryForm> {
     qty.add(qtyController);
 
     return Card(
-      child: Form(
+      color: Colors.white30,
+      child: Container(
+        padding: EdgeInsets.all(10.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            DropdownButtonFormField<String>(
-              value: 'One',
-              icon: Icon(Icons.arrow_downward),
-              iconSize: 24,
-              elevation: 16,
-              style: TextStyle(color: Colors.deepPurple),
-              onChanged: (String newValue) {
-                setState(() {
-                  _data.distributor = newValue;
-                });
-              },
-              items: <String>['One', 'Two', 'Free', 'Four']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(l.toString()),
+                GestureDetector(
+                  child: Icon(Icons.delete),
+                  onTap: (){
+                    _entryDelete(cards.length);
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: cropController,
-              decoration: InputDecoration(labelText: 'Full Name'),
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter something.';
-                }
-              },
+            Form(
+              child: Column(
+                children: [
+                  DropdownButtonFormField(
+                    isExpanded: true,
+                    hint: Text('Select Crop'),
+                    items: _crop.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item['CropId'].toString(),
+                        child: Text(item['CropName']),
+                      );
+                    }).toList(),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        cropController.text = newValue;
+                        //qtyController.text = newValue;
+                      });
+                    },
+                  ),
+
+
+                  DropdownButtonFormField(
+                    isExpanded: true,
+                    hint: Text('Select CropVariety'),
+                    items: _cropVariety.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item['ProductId'].toString(),
+                        child: Text(item['ProductName']),
+                      );
+                    }).toList(),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        varietyController.text = newValue;
+                        //qtyController.text = newValue;
+                      });
+                    },
+                  ),
+                  TextFormField(
+                      controller: qtyController,
+                      onChanged: (value){
+                        qtyController.text = value;
+                      },
+                      decoration: InputDecoration(labelText: 'Qty')
+                  ),
+                ],
+              ),
             ),
-            TextFormField(
-                controller: varietyController,
-                decoration: InputDecoration(labelText: 'Age')),
-            TextFormField(
-                controller: qtyController,
-                decoration: InputDecoration(labelText: 'Study/ job')),
           ],
         ),
       ),
@@ -94,20 +126,34 @@ class _BillEntryFormState extends State<BillEntryForm> {
   @override
   void initState() {
     super.initState();
-    fetchData();
-    _billDate = TextEditingController();
-    cards.add(createCard());
+    fetchData().then((value){
+      _getdistributors().then((value){
+        loader = false;
+        _getcrop().then((value){
+          _getcropVariety().then((value){
+            cards.add(createCard(0));
+            _billDate = TextEditingController();
+          });
+        });
+      });
+    });
   }
 
-  void fetchData() async{
-  List userData = await dbhelper.getall();
-  setState(() {
-    _ustate = userData[0]['state'];
-  });
-  _getdistributors();
-}
+  Future fetchData() async {
+    List userData = await dbhelper.getall();
+    setState(() {
+      _ustate = userData[0]['state'];
+    });
+  }
+
+  void _entryDelete(int id){
+    print(id);
+  }
 
   void _submit() async {
+    setState(() {
+      loader = true;
+    });
     if (this._formKey.currentState.validate()) {
       List<BillEntry> entries = [];
       for (int i = 0; i < cards.length; i++) {
@@ -117,14 +163,87 @@ class _BillEntryFormState extends State<BillEntryForm> {
         entries.add(BillEntry(crop, variety, quantity));
       }
       if (entries != null) print(entries);
-      print('distributor :' + _data.distributor);
-      print('bill:' + _data.billno);
-      print('billdate :' + _data.billDate);
+
+      List<dynamic> userdetail = await dbhelper.get(1);
+      String url = global.baseUrl + "Purchase_ctrl/purchaseOrder";
+
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "vrstKey": userdetail[0]['key']
+      };
+      String json = '{"distributor":"' +
+          _data.distributor +
+          '","billno":"' +
+          _data.billno +
+          '","billdate":"' +
+          _data.billDate +
+          '","entries":"' +
+          entries.toString() +
+          '"}';
+      http.Response response = await http.post(url, headers: headers, body: json);
+      int statusCode = response.statusCode;
+      if(statusCode == 200){
+        setState(() {
+          loader = false;
+        });
+         _purchaseSuccess();
+      }
     }
   }
 
-  void _getdistributors() async {
-    String url = global.baseUrl + 'get-distributors/'+ _ustate;
+
+  Future<void> _purchaseSuccess() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Purchase Success!',textAlign: TextAlign.center,),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You successfully submit your order.',textAlign: TextAlign.center,),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.pushNamed(context, '/orderList');
+
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future _getcrop() async {
+    String url = global.baseUrl + 'get-cropList/';
+    http.Response resposne = await http.get(url);
+    int statusCode = resposne.statusCode;
+    if (statusCode == 200) {
+      setState(() {
+        _crop = jsonDecode(resposne.body);
+      });
+    }
+  }
+
+  Future _getcropVariety() async {
+    String url = global.baseUrl + 'get-cropvariety/';
+    http.Response resposne = await http.get(url);
+    int statusCode = resposne.statusCode;
+    if (statusCode == 200) {
+      setState(() {
+        _cropVariety = jsonDecode(resposne.body);
+      });
+    }
+  }
+
+  Future _getdistributors() async {
+    String url = global.baseUrl + 'get-distributors/' + _ustate;
     print(url);
     http.Response resposne = await http.get(url);
     int statusCode = resposne.statusCode;
@@ -230,120 +349,129 @@ class _BillEntryFormState extends State<BillEntryForm> {
         title: Text('PURCHASE ORDER'),
         centerTitle: true,
       ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+      body: loader ? Container(
+        child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              DropdownButtonFormField(
-                hint: Text('Select Distributor'),
-                items: _distributor.map((item) {
-                  return DropdownMenuItem<String>(
-                    value: item['DealerId'].toString(),
-                    child: Text(item['DealerName']),
-                  );
-                }).toList(),
-                onChanged: (String newValue) {
-                  setState(() {
-                    _data.distributor = newValue;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Bill No.',
-                ),
-                onChanged: (value) {
-                  _data.billno = value;
-                },
-                onSaved: (value) {
-                  _data.billno = value;
-                },
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Enter Bill No.';
-                  }
-                },
-              ),
-              _billDateWidget(),
-              SizedBox(
-                height: 10.0,
-              ),
-              GestureDetector(
-                onTap: () {
-                  _showPicker(context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Upload Bill Image'),
-                    CircleAvatar(
-                  radius: 75,
-                  backgroundColor: Color(0xffFDCF09),
-                  child: _data._image != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(
-                            _data._image,
-                            width: 300,
-                            height: 400,
-                            fit: BoxFit.fill,
-                          ),
-                        )
-                      : Container(
-                          decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(50)),
-                          width: 100,
-                          height: 300,
-                          child: Icon(
-                            Icons.add_a_photo,
-                            color: Colors.grey[800],
-                          ),
+              CircularProgressIndicator(),
+              SizedBox(height: 15.0,),
+              Text('  Loading...',style: TextStyle(color: Colors.redAccent,fontWeight: FontWeight.bold,),),
+            ],
+          ),
+        ),
+        //child: CircularProgressIndicator(),
+      ) : SingleChildScrollView(
+        child: Form(
+            key: _formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  DropdownButtonFormField(
+                    isExpanded: true,
+                    hint: Text('Select Distributor'),
+                    items: _distributor.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item['DealerId'].toString(),
+                        child: Text(item['DealerName']),
+                      );
+                    }).toList(),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        _data.distributor = newValue;
+                      });
+                    },
+                  ),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Bill No.',
+                    ),
+                    onChanged: (value) {
+                      _data.billno = value;
+                    },
+                    onSaved: (value) {
+                      _data.billno = value;
+                    },
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Enter Bill No.';
+                      }
+                    },
+                  ),
+                  _billDateWidget(),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      _showPicker(context);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Upload Bill Image'),
+                        CircleAvatar(
+                          radius: 75,
+                          backgroundColor: Color(0xffFDCF09),
+                          child: _data._image != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Image.file(
+                                    _data._image,
+                                    width: 300,
+                                    height: 300,
+                                    fit: BoxFit.fill,
+                                  ),
+                                )
+                              : Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(100)),
+                                  width: 300,
+                                  height: 300,
+                                  child: Icon(
+                                    Icons.add_a_photo,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
                         ),
-                ),
-                  ],
-                ), 
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              Divider(
-                color: Colors.black,
-              ),
-              Text('Enter Bill Entries'),
-              Divider(
-                color: Colors.black,
-              ),
-              Expanded(
-                child: ListView.builder(
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Divider(
+                    color: Colors.black,
+                  ),
+                  Text('Enter Bill Entries'),
+                  Divider(
+                    color: Colors.black,
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
                     itemCount: cards.length,
                     itemBuilder: (BuildContext context, int index) {
                       return cards[index];
                     },
                   ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  RaisedButton(
+                    child: Text('Submit'),
+                    onPressed: _submit,
+                    color: Colors.green,
+                  ),
+                ],
               ),
-              
-              SizedBox(
-                height: 30.0,
-              ),
-              RaisedButton(
-                child: Text('Submit'),
-                onPressed: _submit,
-                color: Colors.green,
-              ),
-            ],
-          ),
-        )
+            )),
       ),
-      
-      
-      floatingActionButton:
-          FloatingActionButton(
-            child: Icon(Icons.add), 
-            onPressed: () => setState( () => cards.add(createCard())), 
-          ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => setState(() => cards.add(createCard(cards.length))),
+      ),
     );
   }
 }
