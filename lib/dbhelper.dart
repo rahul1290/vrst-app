@@ -8,7 +8,6 @@ class Databasehelper {
   static final _databaseversion = 1;
 
   static final table = "employee";
-
   static final columnID = 'id';
   static final columnName = 'name';
   static final columnState = 'state';
@@ -16,8 +15,13 @@ class Databasehelper {
   static final columnkey = 'key';
   static final columnimage = 'image';
 
-  static Database _database;
+  static final table1 = "billEntries";
+  static final columnId = 'id';
+  static final columnCrop = 'crop';
+  static final columnVariety = 'variety';
+  static final columnQty = 'qty';
 
+  static Database _database;
   Databasehelper._privateConstructor();
   static final Databasehelper instance = Databasehelper._privateConstructor();
 
@@ -35,20 +39,37 @@ class Databasehelper {
   }
 
   Future _onCreate(Database db,int version) async{
-    await db.execute(
-      '''
-        CREATE TABLE $table(
-          $columnID INTEGER PRIMARY KEY,
-          $columnName TEXT NOT NULL,
-          $columnState TEXT NOT NULL,
-          $columnContact VARCHAR(11) NOT NULL,
-          $columnkey TEXT NOT NULL,
-          $columnimage TEXT NOT NULL
-        )
-      '''
-    );
+    await db.execute("CREATE TABLE $table($columnID INTEGER PRIMARY KEY,$columnName TEXT NOT NULL,$columnState TEXT NOT NULL,$columnContact VARCHAR(11) NOT NULL,$columnkey TEXT NOT NULL,$columnimage TEXT NOT NULL)");
+    await db.execute("CREATE TABLE $table1($columnId INTEGER PRIMARY KEY,$columnCrop INTEGER NOT NULL,$columnVariety INTEGER NOT NULL,$columnQty INTEGER NOT NULL)");
   }
 
+////////////////////////////////Bill Entries
+  Future<int>insertBill(Map<String,dynamic> row) async{
+    Database db = await instance.databse;
+    return await db.insert(table1, row);
+  }
+
+  Future <List> maxId() async{
+    Database db = await instance.databse;
+    return await db.rawQuery("select count(*) as count from $table1");
+  }
+
+  Future<List>getallentries() async {
+    Database db = await instance.databse;
+    return await db.query(table1, columns: [columnCrop,columnVariety,columnQty]);
+  }
+
+  Future<int>deleteEntriesData() async{
+    Database db = await instance.databse;
+    var res = await db.delete(table1);
+    return res;
+  }
+
+  Future deleteEntriesId(int id) async {
+    Database db = await instance.databse;
+    var res = await db.rawQuery("delete from $table1 where $columnId = $id");
+    return res;
+  }
 
   /////////////////////////////////////////
   Future<int>insert(Map<String,dynamic> row) async{

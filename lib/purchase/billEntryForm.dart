@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:vrst/dbhelper.dart';
+import 'package:vrst/test.dart';
 
 class BillEntryForm extends StatefulWidget {
   @override
@@ -36,14 +37,21 @@ class _BillEntryFormState extends State<BillEntryForm> {
   bool loader = true;
 
   List _distributor = List();
-  List _crop = List();
-  List _cropVariety = List();
+  List _crop;
+  List _cropVariety;
 
   _FormData _data = new _FormData();
   TextEditingController _billDate;
   final picker = ImagePicker();
+  var Cards = <Container>[];
+  Test test = new Test();
 
-  Card createCard(int l) {
+  Container create_card(){
+    return Container(
+      child: test,
+    );
+  }
+  Card createCard() {
     var cropController = TextEditingController();
     var varietyController = TextEditingController();
     var qtyController = TextEditingController();
@@ -61,7 +69,6 @@ class _BillEntryFormState extends State<BillEntryForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(l.toString()),
                 GestureDetector(
                   child: Icon(Icons.delete),
                   onTap: (){
@@ -83,10 +90,12 @@ class _BillEntryFormState extends State<BillEntryForm> {
                       );
                     }).toList(),
                     onChanged: (String newValue) {
-                      setState(() {
+                     setState(() {
                         cropController.text = newValue;
                         //qtyController.text = newValue;
                       });
+                        _getcropInnerVariety(newValue);
+
                     },
                   ),
 
@@ -107,6 +116,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
                       });
                     },
                   ),
+
                   TextFormField(
                       controller: qtyController,
                       onChanged: (value){
@@ -125,18 +135,20 @@ class _BillEntryFormState extends State<BillEntryForm> {
 
   @override
   void initState() {
-    super.initState();
     fetchData().then((value){
       _getdistributors().then((value){
         loader = false;
         _getcrop().then((value){
           _getcropVariety().then((value){
-            cards.add(createCard(0));
+            //cards.add(createCard());
+            Cards.add(create_card());
             _billDate = TextEditingController();
+            dbhelper.deleteEntriesData();
           });
         });
       });
     });
+    super.initState();
   }
 
   Future fetchData() async {
@@ -151,12 +163,13 @@ class _BillEntryFormState extends State<BillEntryForm> {
   }
 
   void _submit() async {
+    return;
     setState(() {
       loader = true;
     });
     if (this._formKey.currentState.validate()) {
       List<BillEntry> entries = [];
-      for (int i = 0; i < cards.length; i++) {
+      for (int i = 0; i < Cards.length; i++) {
         var crop = cropDropDowm[i].text;
         var variety = varietyDropDown[i].text;
         var quantity = qty[i].text;
@@ -226,7 +239,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
-        _crop = jsonDecode(resposne.body);
+        var data = jsonDecode(resposne.body);
+        //_crop = data['crops'];
       });
     }
   }
@@ -237,7 +251,20 @@ class _BillEntryFormState extends State<BillEntryForm> {
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
+        var data = jsonDecode(resposne.body);
+        //_cropVariety = data['varieties'];
+      });
+    }
+  }
+
+  Future _getcropInnerVariety(String cropId) async {
+    String url = global.baseUrl + 'get-cropvariety/'+cropId;
+    http.Response resposne = await http.get(url);
+    int statusCode = resposne.statusCode;
+    if (statusCode == 200) {
+      setState(() {
         _cropVariety = jsonDecode(resposne.body);
+        print(_cropVariety);
       });
     }
   }
@@ -451,9 +478,9 @@ class _BillEntryFormState extends State<BillEntryForm> {
                   ),
                   ListView.builder(
                     shrinkWrap: true,
-                    itemCount: cards.length,
+                    itemCount: Cards.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return cards[index];
+                      return Cards[index];
                     },
                   ),
                   SizedBox(
@@ -470,8 +497,9 @@ class _BillEntryFormState extends State<BillEntryForm> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => setState(() => cards.add(createCard(cards.length))),
+        onPressed: () => setState(() => Cards.add(create_card())),
       ),
     );
   }
 }
+

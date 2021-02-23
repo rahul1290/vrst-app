@@ -12,6 +12,7 @@ import 'package:vrst/purchase/Purchase.dart';
 import 'file:///D:/flutter_projects/vrst/lib/purchase/returnorder.dart';
 import 'package:vrst/purchase/billEntryForm.dart';
 import 'package:vrst/auth/profile.dart';
+import 'package:vrst/test.dart';
 
 void main() => runApp(MyApp());
 
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/billEntryForm' : (context) => BillEntryForm(),
         '/profile' : (context) => Profilepage(),
         '/orderList' : (context) => OrderList(),
+        '/Test' : (context) => Test(),
       },
     );
   }

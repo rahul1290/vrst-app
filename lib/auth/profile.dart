@@ -17,17 +17,17 @@ class Profilepage extends StatefulWidget {
   _ProfilepageState createState() => _ProfilepageState();
 }
 
-class profileDetail {
+class ProfileDetail {
   String name;
   String contactNo;
-  String AlternetNo;
+  String alternetNo;
   String filePath;
   File _image;
 }
 
 class _ProfilepageState extends State<Profilepage> {
   final _formKey = GlobalKey<FormState>();
-  profileDetail _data = new profileDetail();
+  ProfileDetail _data = new ProfileDetail();
   final dbhelper = Databasehelper.instance;
 
   void _showPicker(context) {
@@ -61,17 +61,18 @@ class _ProfilepageState extends State<Profilepage> {
   }
 
   _imgFromGallery() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
 
     setState(() {
       _data._image = image;
       _data.filePath = base64Encode(image.readAsBytesSync());
-      print(_data.filePath);
     });
   }
 
   _imgFromCamera() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50);
 
@@ -83,22 +84,19 @@ class _ProfilepageState extends State<Profilepage> {
 
   void _submit() async {
     if (this._formKey.currentState.validate()) {
-      List<dynamic> userdetail = await dbhelper.get(1);
+      //List<dynamic> userdetail = await dbhelper.get(1);
       String url = global.baseUrl + "Auth/activate_user";
-      Map<String, String> headers = {
-        "Content-type": "application/json",
-        "vrstKey": userdetail[0]['key']
-      };
-      String json = '{"name":"' +
-          _data.name +
-          '","contactNo":"' +
-          _data.contactNo +
-          '","alternetNo":"' +
-          _data.AlternetNo +
-          '","image":"' +
-          _data.filePath +
-          '"}';
-      http.Response response = await http.post(url, headers: headers, body: json);
+      // Map<String, String> headers = {
+      //     "Content-type": "application/json",
+      //   "vrstKey": userdetail[0]['key']
+      // };
+
+      http.Response response = await http.post(url, body: {
+        'name' : _data.name,
+        'contactNo': _data.contactNo,
+        'alternetNo' : _data.alternetNo,
+        'image' : _data.filePath
+      });
       int statusCode = response.statusCode;
       Map body = jsonDecode(response.body);
       print(body);
@@ -147,12 +145,12 @@ class _ProfilepageState extends State<Profilepage> {
                                 decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(100)),
-                                width: 300,
-                                height: 300,
-                                child: Icon(
-                                  Icons.add_a_photo,
-                                  color: Colors.grey[800],
-                                ),
+                                    width: 300,
+                                    height: 300,
+                                    child: Icon(
+                                      Icons.add_a_photo,
+                                      color: Colors.grey[800],
+                                    ),
                               ),
                             ),
                       ),
@@ -196,7 +194,7 @@ class _ProfilepageState extends State<Profilepage> {
                         ),
                         keyboardType: TextInputType.phone,
                         maxLength: 10,
-                        initialValue: '123',
+                        initialValue: '1231231230',
                         validator: (value){
                           if(value.isEmpty){
                             return 'Please enter contact no.';
@@ -225,14 +223,14 @@ class _ProfilepageState extends State<Profilepage> {
                         ),
                         keyboardType: TextInputType.phone,
                         maxLength: 10,
-                        //initialValue: '',
+                        initialValue: '1231231230',
                         validator: (value){
                           if(value.length != 10){
                             return 'Please enter valid contact no';
                           }
                         },
                         onSaved: (String value){
-                          this._data.AlternetNo = value;
+                          this._data.alternetNo = value;
                         },
                       ),
 
