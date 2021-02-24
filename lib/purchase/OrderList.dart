@@ -45,7 +45,7 @@ class _OrderListState extends State<OrderList> {
           title: Text('Order List'),
           centerTitle: true,
         ),
-        //drawer: DrawerPage(),
+        drawer: DrawerPage(),
         body: loader ? Container(
           child: Center(
             child: Column(
@@ -58,7 +58,8 @@ class _OrderListState extends State<OrderList> {
             ),
           ),
           //child: CircularProgressIndicator(),
-        ) : ListView.builder(
+        ) :
+        ListView.builder(
           itemCount: _orders.length,
           itemBuilder: (context, index) {
             return Padding(
@@ -98,6 +99,12 @@ class _OrderListState extends State<OrderList> {
                 ),
               ),
             );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.assignment_return_outlined),
+          onPressed: () {
+            Navigator.pushNamed(context, '/returnOrder');
           },
         ),
       );

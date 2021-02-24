@@ -18,17 +18,47 @@ class Profilepage extends StatefulWidget {
 }
 
 class ProfileDetail {
-  String name;
-  String contactNo;
-  String alternetNo;
   String filePath;
+  String name;
+  String address;
+  String alternetNo;
+  String email;
+  String pan;
   File _image;
+
+  //ProfileDetail(this.name,this.address,this.alternetNo,this.email,this.pan,this._image);
 }
 
 class _ProfilepageState extends State<Profilepage> {
   final _formKey = GlobalKey<FormState>();
   ProfileDetail _data = new ProfileDetail();
   final dbhelper = Databasehelper.instance;
+  bool loader = true;
+  String profilePic;
+  List _userDetail;
+  @override
+  void initState() {
+    _getuserDetail();
+    super.initState();
+  }
+
+  Future _getuserDetail() async {
+    List<dynamic> userdetail = await dbhelper.get(1);
+    String url = global.baseUrl + "Auth/profile_detail";
+    Map<String, String> headers = {
+      "Content-type": "application/x-www-form-urlencoded",
+      "vrstKey": userdetail[0]['key']
+    };
+    http.Response response = await http.get(url, headers: headers);
+    int statusCode = response.statusCode;
+    if (statusCode == 200) {
+      setState(() {
+        loader = false;
+        _userDetail = jsonDecode(response.body);
+        profilePic = global.baseUrl+'../assets/images/userprofile/'+ userdetail[0]['image'].toString() +'.jpg';
+      });
+    }
+  }
 
   void _showPicker(context) {
     showModalBottomSheet(
@@ -78,34 +108,59 @@ class _ProfilepageState extends State<Profilepage> {
 
     setState(() {
       _data._image = image;
+      _data.filePath = base64Encode(image.readAsBytesSync());
     });
   }
 
-
   void _submit() async {
     if (this._formKey.currentState.validate()) {
-      //List<dynamic> userdetail = await dbhelper.get(1);
-      String url = global.baseUrl + "Auth/activate_user";
-      // Map<String, String> headers = {
-      //     "Content-type": "application/json",
-      //   "vrstKey": userdetail[0]['key']
-      // };
-
-      http.Response response = await http.post(url, body: {
-        'name' : _data.name,
-        'contactNo': _data.contactNo,
-        'alternetNo' : _data.alternetNo,
-        'image' : _data.filePath
+      _formKey.currentState.save();
+      List<dynamic> userdetail = await dbhelper.get(1);
+      String url = global.baseUrl + "Auth/profile_update";
+      Map<String, String> headers = {
+        "Content-type": "application/x-www-form-urlencoded",
+        "vrstKey": userdetail[0]['key']
+      };
+      http.Response response = await http.post(url, headers: headers, body: {
+        'name': _data.name,
+        'contactNo': _data.address,
+        'alternetNo': _data.alternetNo,
+        'image': _data.filePath
       });
       int statusCode = response.statusCode;
       Map body = jsonDecode(response.body);
-      print(body);
-      if(statusCode == 200){
-        //_purchaseSuccess();
+      if (statusCode == 200) {
+        _profileUpdateSuccess();
       }
     }
   }
 
+  Future<void> _profileUpdateSuccess() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Profile updated!',textAlign: TextAlign.center,),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You successfully update your profile.',textAlign: TextAlign.center,),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.pushNamed(context, '/orderList');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,139 +170,213 @@ class _ProfilepageState extends State<Profilepage> {
         centerTitle: true,
       ),
       drawer: DrawerPage(),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Form(
-                  key: _formKey,
+      body: loader
+          ? Container(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Text(
+                      '  Loading...',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              //child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          _showPicker(context);
-                        },
-                        child: CircleAvatar(
-                              radius: 75,
-                              backgroundColor: Color(0xffFDCF09),
-                              child: _data._image != null
-                                  ? ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.file(
-                                  _data._image,
-                                  width: 300,
-                                  height: 300,
-                                  fit: BoxFit.fill,
+                      Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  _showPicker(context);
+                                },
+                                child: CircleAvatar(
+                                  radius: 75,
+                                  backgroundColor: Color(0xffFDCF09),
+                                  child: _data._image != null
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: Image.file(
+                                            _data._image,
+                                            width: 300,
+                                            height: 300,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        )
+                                      : Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.grey[200],
+                                              borderRadius:
+                                                  BorderRadius.circular(100)),
+                                          width: 300,
+                                          height: 300,
+                                          child: Icon(
+                                            Icons.add_a_photo,
+                                            color: Colors.grey[800],
+                                          ),
+                                        ),
                                 ),
-                              )
-                                  : Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(100)),
-                                    width: 300,
-                                    height: 300,
-                                    child: Icon(
-                                      Icons.add_a_photo,
-                                      color: Colors.grey[800],
-                                    ),
                               ),
-                            ),
-                      ),
-                      SizedBox(height: 10.0,),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Enter Your Number',
-                          icon: Icon(Icons.person,color:Colors.grey,),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        keyboardType: TextInputType.text,
-                        initialValue: 'rahul',
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'Please enter username no.';
-                          }
-                        },
-                        onSaved: (String value){
-                          this._data.name = value;
-                        },
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      TextFormField(
-                        key: Key('contactno'),
-                        decoration: InputDecoration(
-                          labelText: 'Enter Contact Number',
-                          icon: Icon(Icons.mobile_friendly_sharp,color:Colors.grey,),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        maxLength: 10,
-                        initialValue: '1231231230',
-                        validator: (value){
-                          if(value.isEmpty){
-                            return 'Please enter contact no.';
-                          }
-                          if(value.length != 10){
-                            return 'Please enter valid contact no';
-                          }
-                        },
-                        onSaved: (String value){
-                          this._data.contactNo = value;
-                        },
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Alternet Contact Number',
-                          icon: Icon(Icons.mobile_friendly_sharp,color:Colors.grey,),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        maxLength: 10,
-                        initialValue: '1231231230',
-                        validator: (value){
-                          if(value.length != 10){
-                            return 'Please enter valid contact no';
-                          }
-                        },
-                        onSaved: (String value){
-                          this._data.alternetNo = value;
-                        },
-                      ),
-
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      RaisedButton(
-                          onPressed: _submit,
-                          child: Text('Update Profile'),
-                      ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Enter Your Number',
+                                  icon: Icon(
+                                    Icons.person,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                keyboardType: TextInputType.text,
+                                initialValue: _userDetail[0]['user_name'],
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter username no.';
+                                  }
+                                },
+                                onSaved: (String value) {
+                                  _data.name = value;
+                                },
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              TextFormField(
+                                maxLines: 3,
+                                decoration: InputDecoration(
+                                  labelText: 'Address',
+                                  icon: Icon(
+                                    Icons.place,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                initialValue: _userDetail[0]['address'],
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Please enter Address.';
+                                  }
+                                },
+                                onSaved: (String value) {
+                                  _data.address = value;
+                                },
+                                keyboardType: TextInputType.multiline,
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Alternet Contact Number',
+                                  icon: Icon(
+                                    Icons.mobile_friendly_sharp,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                keyboardType: TextInputType.phone,
+                                maxLength: 10,
+                                initialValue: _userDetail[0]['contact_no'],
+                                validator: (value) {
+                                  if (value.length != 10) {
+                                    return 'Please enter valid contact no';
+                                  }
+                                },
+                                onSaved: (String value) {
+                                  _data.alternetNo = value;
+                                },
+                              ),
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Enter EmailID',
+                                  icon: Icon(
+                                    Icons.mail,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                initialValue: _userDetail[0]['email'],
+                                onSaved: (String value) {
+                                  _data.email = value;
+                                },
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: 'Enter PAN no.',
+                                  icon: Icon(
+                                    Icons.mail,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: BorderSide(
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                                initialValue: _userDetail[0]['pan_no'],
+                                onSaved: (String value) {
+                                  _data.pan = value;
+                                },
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                              SizedBox(
+                                height: 10.0,
+                              ),
+                              RaisedButton(
+                                onPressed: _submit,
+                                child: Text('Update Profile'),
+                              ),
+                            ],
+                          )),
                     ],
-                  )
+                  ),
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

@@ -54,7 +54,7 @@ class LoginPageState extends State<LoginPage> {
             Databasehelper.columnContact : body['contact_no'],
             Databasehelper.columnState : body['state_id'],
             Databasehelper.columnkey : body['token'],
-            Databasehelper.columnimage : '',
+            Databasehelper.columnimage : body['user_id'],
           };
           await dbhelper.insert(row);
           setState(() {

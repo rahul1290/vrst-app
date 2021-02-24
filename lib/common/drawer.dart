@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:vrst/common/global.dart' as global;
 import 'package:vrst/dbhelper.dart';
 
 class DrawerPage extends StatefulWidget {
@@ -11,6 +12,7 @@ class _DrawerPageState extends State<DrawerPage> {
 final dbhelper = Databasehelper.instance;
 String _uname = '';
 String _uemail = '';
+String _uimage = '';
 
 
 @override
@@ -24,6 +26,7 @@ void fetchData() async{
   setState(() {
     _uname = userData[0]['name'];
     _uemail = userData[0]['contact'];
+    _uimage = userData[0]['image'];
   });
 }
 
@@ -72,16 +75,13 @@ Future<void> logout() async {
           UserAccountsDrawerHeader(
             accountName: Text(_uname),
             accountEmail: Text(_uemail),
-            // currentAccountPicture: CircleAvatar(
-            //   backgroundColor: Colors.white54,
-            //   backgroundImage: NetworkImage('https://www.vnrseeds.co.in/hrims/images/LogoNew.png',scale:1),
-            // ),
             currentAccountPicture: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(100.0),
               child: Image.network(
-                'https://www.vnrseeds.co.in/hrims/images/LogoNew.png',
+                global.baseUrl + '../assets/images/userprofile/'+ _uimage +'.jpg',
                 height: 150.0,
-                width: 100.0,
+                width: 150.0,
+
               ),
             ),
              otherAccountsPictures: <Widget>[
@@ -118,15 +118,11 @@ Future<void> logout() async {
             leading: Icon(Icons.add_shopping_cart_outlined,color: Colors.green,),
             title: Text('OrderList'),
             onTap: (){
-              //Navigator.pushNamed(context, '/orderList');
-              Navigator.pushNamed(context, '/Test');
+              Navigator.pushNamed(context, '/orderList');
+              //Navigator.pushNamed(context, '/Test');
             },
           ),
-          ListTile(
-            leading: Icon(Icons.remove_shopping_cart_outlined, color: Colors.orange,),
-            title: Text('Return Order'),
-            onTap: () => Navigator.pushNamed(context, '/returnOrder'),
-          ),
+
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Logout'),

@@ -37,7 +37,6 @@ class _OrderDetailState extends State<OrderDetail> {
     if (statusCode == 200) {
       setState(() {
         _orderDetail = jsonDecode(resposne.body);
-        print(_orderDetail);
         loader = false;
       });
     }
@@ -108,7 +107,7 @@ class _OrderDetailState extends State<OrderDetail> {
                           ],
                         ),
                         SizedBox(height: 25.0,),
-                        JsonTable(
+                        _orderDetail['order_detail'].toString().length > 2 ? JsonTable(
                           _orderDetail['order_detail'],
                           tableHeaderBuilder: (String header) {
                             return Container(
@@ -139,7 +138,7 @@ class _OrderDetailState extends State<OrderDetail> {
                               ),
                             );
                           },
-                        ),
+                        ) : Text('No Entries found.') ,
                         SizedBox(height: 10.0,),
                         RaisedButton(
                             onPressed: (){},

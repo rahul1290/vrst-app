@@ -26,7 +26,6 @@ class _FormData {
 
 class _BillEntryFormState extends State<BillEntryForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> _formNewKey = GlobalKey<FormState>();
 
   var cropDropDowm = <TextEditingController>[];
   var varietyDropDown = <TextEditingController>[];
@@ -35,6 +34,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
   final dbhelper = Databasehelper.instance;
   String _ustate;
   bool loader = true;
+  String filePath;
 
   List _distributor = List();
   List _crop;
@@ -49,87 +49,6 @@ class _BillEntryFormState extends State<BillEntryForm> {
   Container create_card(){
     return Container(
       child: test,
-    );
-  }
-  Card createCard() {
-    var cropController = TextEditingController();
-    var varietyController = TextEditingController();
-    var qtyController = TextEditingController();
-    cropDropDowm.add(cropController);
-    varietyDropDown.add(varietyController);
-    qty.add(qtyController);
-
-    return Card(
-      color: Colors.white30,
-      child: Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  child: Icon(Icons.delete),
-                  onTap: (){
-                    _entryDelete(cards.length);
-                  },
-                ),
-              ],
-            ),
-            Form(
-              child: Column(
-                children: [
-                  DropdownButtonFormField(
-                    isExpanded: true,
-                    hint: Text('Select Crop'),
-                    items: _crop.map((item) {
-                      return DropdownMenuItem<String>(
-                        value: item['CropId'].toString(),
-                        child: Text(item['CropName']),
-                      );
-                    }).toList(),
-                    onChanged: (String newValue) {
-                     setState(() {
-                        cropController.text = newValue;
-                        //qtyController.text = newValue;
-                      });
-                        _getcropInnerVariety(newValue);
-
-                    },
-                  ),
-
-
-                  DropdownButtonFormField(
-                    isExpanded: true,
-                    hint: Text('Select CropVariety'),
-                    items: _cropVariety.map((item) {
-                      return DropdownMenuItem<String>(
-                        value: item['ProductId'].toString(),
-                        child: Text(item['ProductName']),
-                      );
-                    }).toList(),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        varietyController.text = newValue;
-                        //qtyController.text = newValue;
-                      });
-                    },
-                  ),
-
-                  TextFormField(
-                      controller: qtyController,
-                      onChanged: (value){
-                        qtyController.text = value;
-                      },
-                      decoration: InputDecoration(labelText: 'Qty')
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -158,48 +77,33 @@ class _BillEntryFormState extends State<BillEntryForm> {
     });
   }
 
-  void _entryDelete(int id){
-    print(id);
-  }
-
   void _submit() async {
-    return;
-    setState(() {
-      loader = true;
-    });
     if (this._formKey.currentState.validate()) {
-      List<BillEntry> entries = [];
-      for (int i = 0; i < Cards.length; i++) {
-        var crop = cropDropDowm[i].text;
-        var variety = varietyDropDown[i].text;
-        var quantity = qty[i].text;
-        entries.add(BillEntry(crop, variety, quantity));
-      }
-      if (entries != null) print(entries);
-
+      _formKey.currentState.save();
+      // setState(() {
+      //   loader = true;
+      // });
+      List Entries = await dbhelper.getallentries();
       List<dynamic> userdetail = await dbhelper.get(1);
       String url = global.baseUrl + "Purchase_ctrl/purchaseOrder";
-
       Map<String, String> headers = {
-        "Content-type": "application/json",
+        "Content-type": "application/x-www-form-urlencoded",
         "vrstKey": userdetail[0]['key']
       };
-      String json = '{"distributor":"' +
-          _data.distributor +
-          '","billno":"' +
-          _data.billno +
-          '","billdate":"' +
-          _data.billDate +
-          '","entries":"' +
-          entries.toString() +
-          '"}';
-      http.Response response = await http.post(url, headers: headers, body: json);
+      //String json = '{"distributor":"' +_data.distributor +'","billno":"' +_data.billno +'","billdate":"' +_data.billDate +'","entries":"' +Entries.toString() +'","billimage":"' + filePath +'"}';
+      http.Response response = await http.post(url, headers: headers, body: {
+        'distributor' : _data.distributor,
+        'billno' : _data.billno,
+        'billdate' : _data.billDate,
+        'entries' : Entries.toString(),
+        'billimage' : filePath
+      });
       int statusCode = response.statusCode;
       if(statusCode == 200){
         setState(() {
           loader = false;
         });
-         _purchaseSuccess();
+        _purchaseSuccess();
       }
     }
   }
@@ -223,8 +127,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
             FlatButton(
               child: Text('Ok'),
               onPressed: () {
+                Navigator.pop(context);
                 Navigator.pushNamed(context, '/orderList');
-
               },
             ),
           ],
@@ -357,6 +261,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
 
     setState(() {
       _data._image = image;
+      filePath = base64Encode(image.readAsBytesSync());
     });
   }
 
@@ -366,6 +271,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
 
     setState(() {
       _data._image = image;
+      filePath = base64Encode(image.readAsBytesSync());
     });
   }
 
@@ -476,7 +382,10 @@ class _BillEntryFormState extends State<BillEntryForm> {
                   Divider(
                     color: Colors.black,
                   ),
+
                   ListView.builder(
+                    //itemExtent: 10.0,
+                    physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemCount: Cards.length,
                     itemBuilder: (BuildContext context, int index) {
