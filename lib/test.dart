@@ -32,7 +32,7 @@ class _TestState extends State<Test> {
       };
 
       await dbhelper.insertBill(row);
-      List userData = await dbhelper.getallentries();
+      //List userData = await dbhelper.getallentries();
       List insertId = await dbhelper.maxId();
 
       setState(() {
@@ -45,7 +45,7 @@ class _TestState extends State<Test> {
 
   void deleteData() async{
     dbhelper.deleteEntriesId(int.parse(_entryId));
-    List userData = await dbhelper.getallentries();
+    //List userData = await dbhelper.getallentries();
     setState(() {
       isDeleted = 1;
     });
@@ -169,6 +169,8 @@ class _TestState extends State<Test> {
                         validator: (String value) {
                           if(value.isEmpty){
                             return 'please enter quantity in gm.';
+                          } else {
+                            return null;
                           }
                         },
                       ),
@@ -203,6 +205,7 @@ class _TestState extends State<Test> {
   String _myState;
   String _qty;
   String stateInfoUrl = 'http://www.vnrdev.in/vrst/api/get-cropList/';
+
   Future<String> _getStateList() async {
     await http.get(stateInfoUrl, headers: {
       'Content-Type': 'application/x-www-form-urlencoded'

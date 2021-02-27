@@ -26,7 +26,7 @@ class _PurchaseState extends State<Purchase> {
   List _distributor = List();
 
   TextEditingController _billController;
-  static List<String> friendsList = [null];
+  //static List<String> friendsList = [null];
 
   File _image;
   final picker = ImagePicker();
@@ -200,6 +200,8 @@ class _PurchaseState extends State<Purchase> {
       validator: (String value) {
         if (value.isEmpty) {
           return 'Select date';
+        } else {
+          return null;
         }
       },
     );
@@ -258,6 +260,8 @@ class _PurchaseState extends State<Purchase> {
                           validator: (value){
                             if(value.isEmpty){
                               return 'Please enter Bill no.';
+                            } else {
+                              return null;
                             }
                           },
                         ),

@@ -38,6 +38,7 @@ dependencies:
   flutter_launcher_name: ^0.0.1
   json_table: ^1.4.0
   flutter_html: ^1.2.0
+  blinking_text: ^0.0.4+1
 
 dev_dependencies:
   flutter_test:

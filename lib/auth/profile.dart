@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vrst/common/drawer.dart';
-import 'package:vrst/purchase/bilEntry.dart';
+// import 'package:vrst/purchase/bilEntry.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vrst/common/global.dart' as global;
 import 'dart:async';
@@ -9,7 +9,7 @@ import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 import 'package:vrst/dbhelper.dart';
 
 class Profilepage extends StatefulWidget {
@@ -128,7 +128,6 @@ class _ProfilepageState extends State<Profilepage> {
         'image': _data.filePath
       });
       int statusCode = response.statusCode;
-      Map body = jsonDecode(response.body);
       if (statusCode == 200) {
         _profileUpdateSuccess();
       }
@@ -256,6 +255,8 @@ class _ProfilepageState extends State<Profilepage> {
                                 validator: (value) {
                                   if (value.isEmpty) {
                                     return 'Please enter username no.';
+                                  } else {
+                                    return null;
                                   }
                                 },
                                 onSaved: (String value) {
@@ -284,6 +285,8 @@ class _ProfilepageState extends State<Profilepage> {
                                 validator: (value) {
                                   if (value.isEmpty) {
                                     return 'Please enter Address.';
+                                  } else {
+                                    return null;
                                   }
                                 },
                                 onSaved: (String value) {
@@ -314,6 +317,8 @@ class _ProfilepageState extends State<Profilepage> {
                                 validator: (value) {
                                   if (value.length != 10) {
                                     return 'Please enter valid contact no';
+                                  } else {
+                                    return null;
                                   }
                                 },
                                 onSaved: (String value) {

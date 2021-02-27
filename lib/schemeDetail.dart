@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vrst/common/global.dart' as global;
-import 'dart:io';
+// import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
@@ -28,6 +28,7 @@ class _SchemeDetailState extends State<SchemeDetail> {
 
   void _getSchemesDetail() async {
     String url = global.baseUrl + 'scheme-detail/' + widget.schemeId;
+    print(url);
     http.Response resposne = await http.get(url);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
@@ -95,7 +96,7 @@ class _SchemeDetailState extends State<SchemeDetail> {
                                   color: Colors.grey[300]),
                               child: Text(
                                 header,
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 //style: Theme.of(context).accentColorBrightness,
                               ),
                             );
@@ -109,7 +110,7 @@ class _SchemeDetailState extends State<SchemeDetail> {
                                       width: 0.5, color: Colors.grey.withOpacity(0.5))),
                               child: Text(
                                 value,
-                                textAlign: TextAlign.center,
+                                textAlign: TextAlign.start,
                                 style: TextStyle(fontSize: 16.0),
                                 //style: Theme.of(context).textTheme.display1.copyWith(fontSize: 14.0, color: Colors.grey[900]),
                               ),

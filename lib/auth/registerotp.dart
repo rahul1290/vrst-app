@@ -20,7 +20,7 @@ class RegisterotpState extends State<Registerotp> {
   final dbhelper = Databasehelper.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final int codeLength = 4;
-  String _OTP;
+  String _otp;
 
   String validateCode(String code){
     if(code.length < codeLength) return "Please complete the code";
@@ -39,7 +39,7 @@ class RegisterotpState extends State<Registerotp> {
       String url = global.baseUrl+'registration-otp';
       print(url);
       //Map<String, String> headers = {"Content-type": "application/json"};
-      http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_OTP});
+      http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_otp});
       int statusCode = response.statusCode;
       print(statusCode);
       if(statusCode == 200){
@@ -113,9 +113,7 @@ class RegisterotpState extends State<Registerotp> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      // onWillPop: _onWillPop,
-      child: Scaffold(
+    return Scaffold(
               body: loader ? Container(
               child: Center(
                 child: Column(
@@ -165,7 +163,7 @@ class RegisterotpState extends State<Registerotp> {
                                       validator: validateCode,
                                       onChanged: (value){
                                         setState(() {
-                                          _OTP = value;
+                                          _otp = value;
                                         });
                                       },
                                       inputDecoration: InputDecoration(
@@ -207,7 +205,6 @@ class RegisterotpState extends State<Registerotp> {
                   ),
                 ),
             )
-      ),
-    );
+      );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:vrst/common/global.dart' as global;
 import 'package:vrst/common/drawer.dart';
@@ -6,6 +8,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
 import 'package:vrst/schemeDetail.dart';
+import 'package:blinking_text/blinking_text.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -29,7 +32,6 @@ class _DashboardState extends State<Dashboard> {
                   fontWeight: FontWeight.bold,
                   fontSize: 16),
             ),
-            //content: new Text('',style:TextStyle(fontSize: 16),),
             actions: <Widget>[
               FlatButton(
                 onPressed: () => exit(0),
@@ -60,9 +62,9 @@ class _DashboardState extends State<Dashboard> {
 
   void _getSchemes() async {
     List<dynamic> userdetail = await dbhelper.get(1);
+    Map<String, String> headers = { "Content-type": "application/x-www-form-urlencoded","vrstKey": userdetail[0]['key'] };
     String url = global.baseUrl + 'all-scheme/' + userdetail[0]['state'];
-    print(url);
-    http.Response resposne = await http.get(url);
+    http.Response resposne = await http.get(url,headers: headers);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
@@ -101,17 +103,64 @@ class _DashboardState extends State<Dashboard> {
               padding: const EdgeInsets.only(top:4.0),
               child: Card(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
-                      leading: CircleAvatar(
-                        child: Text(_schemes[index]['heading'].substring(0, 1)),
-                      ),
-                      //trailing: Icon(Icons.arrow_forward_ios_sharp),
+                      // leading: CircleAvatar(
+                      //   child: Text(_schemes[index]['heading'].substring(0, 1)),
+                      // ),
                       title: Text(_schemes[index]['heading']),
-                      subtitle: Text(_schemes[index]['subheading'].length > 100
-                          ? _schemes[index]['subheading'].substring(0, 100)
-                          : _schemes[index]['subheading']),
+                      subtitle: Text(_schemes[index]['subheading'].length > 100 ? _schemes[index]['subheading'].substring(0, 100) : _schemes[index]['subheading']),
                     ),
+                    
+                    Padding(
+                      padding: const EdgeInsets.only(left:16.0),
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text('Eligible For : ',style: TextStyle(color: Colors.green,fontWeight: FontWeight.bold),),
+                                BlinkText(
+                                _schemes[index]['claim'].toString().toUpperCase(),
+                                style: TextStyle(fontSize: 16.0, color: Colors.green),
+                                beginColor: Colors.black,
+                                endColor: Colors.green,
+                                times: 10,
+                                duration: Duration(seconds: 2),
+                              ),
+                              ],
+                            ),
+                            ),
+                            
+                            SizedBox(height: 6.0,),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text('Next to Close : ',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
+                                BlinkText(
+                                _schemes[index]['next'].toString().toUpperCase(),
+                                style: TextStyle(fontSize: 16.0, color: Colors.red),
+                                beginColor: Colors.black,
+                                endColor: Colors.red,
+                                times: 10,
+                                duration: Duration(seconds: 1),
+                              ),
+                              ],
+                            ),
+                            ),
+                            
+                          ],
+                        ), 
+                      ),
+                    ),
+                    
                     ButtonBar(
                       children: [
                         RaisedButton(
@@ -120,7 +169,7 @@ class _DashboardState extends State<Dashboard> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
                           ),
-                          child: Text('View Detail',style: TextStyle(color: Colors.white),),
+                          child: Text('View Scheme Detail',style: TextStyle(color: Colors.white),),
                           onPressed: (){
                             Navigator.push(
                               context,

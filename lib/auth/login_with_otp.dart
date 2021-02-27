@@ -93,9 +93,7 @@ class LoginwithotpState extends State<Loginwithotp> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      // onWillPop: _onWillPop,
-      child: Scaffold(
+    return Scaffold(
               body: loader ? Container(
               child: Center(
                 child: Column(
@@ -191,7 +189,6 @@ class LoginwithotpState extends State<Loginwithotp> {
                   ),
                 ),
             )
-      ),
-    );
+      );
   }
 }

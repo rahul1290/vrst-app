@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:vrst/common/global.dart' as global;
-import 'dart:io';
+//import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
 import 'package:json_table/json_table.dart';
-import 'package:flutter_html/flutter_html.dart';
+//import 'package:flutter_html/flutter_html.dart';
 
 class OrderDetail extends StatefulWidget {
   @override

@@ -53,7 +53,9 @@ class Splashscreen extends StatefulWidget {
 
 class _SplashscreenState extends State<Splashscreen> {
   final dbhelper = Databasehelper.instance;
+
   @override
+  // ignore: must_call_super
   void initState() {
     // TODO: implement initState
     Timer(Duration(seconds: 3), nextPage);

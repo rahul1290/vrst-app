@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+//import 'dart:io';
 import 'package:vrst/common/global.dart' as global;
 import 'package:vrst/dbhelper.dart';
 
@@ -16,6 +16,7 @@ String _uimage = '';
 
 
 @override
+// ignore: must_call_super
 void initState() {
   // TODO: implement initState
   fetchData();

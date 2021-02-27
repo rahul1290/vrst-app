@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vrst/common/global.dart' as global;
 import 'package:vrst/common/drawer.dart';
-import 'dart:io';
+//import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
 import 'package:vrst/purchase/OrderDetail.dart';
-import 'package:vrst/schemeDetail.dart';
+//import 'package:vrst/schemeDetail.dart';
 
 class OrderList extends StatefulWidget {
   @override

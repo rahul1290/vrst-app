@@ -52,7 +52,7 @@ class _RegisterState extends State<Register> {
       _formKey.currentState.save();
 
       String url = global.baseUrl+'registration';
-      Map<String, String> headers = {"Content-type": "application/json"};
+      //Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'state_id':_data.state,'name':_data.name,'contact':_data.contact,'password':_data.password,'email':_data.email,'pan':_data.pan});
       int statusCode = response.statusCode;
       print(statusCode);
@@ -126,6 +126,8 @@ class _RegisterState extends State<Register> {
                             }
                             if(value.length < 3){
                               return 'Name should at least 4 characters';
+                            } else {
+                              return null;
                             }
                           },
                           onSaved: (String value){
@@ -155,6 +157,9 @@ class _RegisterState extends State<Register> {
                             }
                             if(value.length != 10){
                               return 'Please enter valid contact no';
+                            } 
+                            else {
+                              return null;
                             }
                           },
                           onSaved: (String value){
@@ -181,6 +186,9 @@ class _RegisterState extends State<Register> {
                             }
                             if(value.length < 3){
                               return 'Password should at least 4 digits';
+                            }
+                            else {
+                              return null;
                             }
                           },
                           onSaved: (String value){
@@ -216,6 +224,9 @@ class _RegisterState extends State<Register> {
                               print(newValue);
                               if(newValue == 0 || newValue == ''){
                                 return 'Please select state.';
+                              } 
+                              else {
+                                return null;
                               }
                             },
                         ),
@@ -235,6 +246,9 @@ class _RegisterState extends State<Register> {
                           validator: (value){
                             if(value.isEmpty){
                                 return 'Please enter Address.';
+                            }
+                            else {
+                              return null;
                             }
                           },
                           onSaved: (String value){

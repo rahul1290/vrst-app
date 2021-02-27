@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vrst/purchase/bilEntry.dart';
+//import 'package:vrst/purchase/bilEntry.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vrst/common/global.dart' as global;
 import 'dart:async';
@@ -30,23 +30,22 @@ class _BillEntryFormState extends State<BillEntryForm> {
   var cropDropDowm = <TextEditingController>[];
   var varietyDropDown = <TextEditingController>[];
   var qty = <TextEditingController>[];
-  var cards = <Card>[];
   final dbhelper = Databasehelper.instance;
   String _ustate;
   bool loader = true;
   String filePath;
 
   List _distributor = List();
-  List _crop;
-  List _cropVariety;
+  //List _crop;
+  //List _cropVariety;
 
   _FormData _data = new _FormData();
   TextEditingController _billDate;
   final picker = ImagePicker();
-  var Cards = <Container>[];
+  var cards = <Container>[];
   Test test = new Test();
 
-  Container create_card(){
+  Container createCard(){
     return Container(
       child: test,
     );
@@ -60,7 +59,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
         _getcrop().then((value){
           _getcropVariety().then((value){
             //cards.add(createCard());
-            Cards.add(create_card());
+            cards.add(createCard());
             _billDate = TextEditingController();
             dbhelper.deleteEntriesData();
           });
@@ -83,7 +82,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
       // setState(() {
       //   loader = true;
       // });
-      List Entries = await dbhelper.getallentries();
+      List entries = await dbhelper.getallentries();
       List<dynamic> userdetail = await dbhelper.get(1);
       String url = global.baseUrl + "Purchase_ctrl/purchaseOrder";
       Map<String, String> headers = {
@@ -95,7 +94,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
         'distributor' : _data.distributor,
         'billno' : _data.billno,
         'billdate' : _data.billDate,
-        'entries' : Entries.toString(),
+        'entries' : entries.toString(),
         'billimage' : filePath
       });
       int statusCode = response.statusCode;
@@ -143,7 +142,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
-        var data = jsonDecode(resposne.body);
+        //var data = jsonDecode(resposne.body);
         //_crop = data['crops'];
       });
     }
@@ -155,23 +154,23 @@ class _BillEntryFormState extends State<BillEntryForm> {
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
-        var data = jsonDecode(resposne.body);
+        //var data = jsonDecode(resposne.body);
         //_cropVariety = data['varieties'];
       });
     }
   }
 
-  Future _getcropInnerVariety(String cropId) async {
-    String url = global.baseUrl + 'get-cropvariety/'+cropId;
-    http.Response resposne = await http.get(url);
-    int statusCode = resposne.statusCode;
-    if (statusCode == 200) {
-      setState(() {
-        _cropVariety = jsonDecode(resposne.body);
-        print(_cropVariety);
-      });
-    }
-  }
+  // Future _getcropInnerVariety(String cropId) async {
+  //   String url = global.baseUrl + 'get-cropvariety/'+cropId;
+  //   http.Response resposne = await http.get(url);
+  //   int statusCode = resposne.statusCode;
+  //   if (statusCode == 200) {
+  //     setState(() {
+  //       _cropVariety = jsonDecode(resposne.body);
+  //       print(_cropVariety);
+  //     });
+  //   }
+  // }
 
   Future _getdistributors() async {
     String url = global.baseUrl + 'get-distributors/' + _ustate;
@@ -220,6 +219,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
       validator: (String value) {
         if (value.isEmpty) {
           return 'Select date';
+        } else {
+          return null;
         }
       },
     );
@@ -329,6 +330,8 @@ class _BillEntryFormState extends State<BillEntryForm> {
                     validator: (value) {
                       if (value.isEmpty) {
                         return 'Enter Bill No.';
+                      } else {
+                        return null;
                       }
                     },
                   ),
@@ -387,9 +390,9 @@ class _BillEntryFormState extends State<BillEntryForm> {
                     //itemExtent: 10.0,
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: Cards.length,
+                    itemCount: cards.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Cards[index];
+                      return cards[index];
                     },
                   ),
                   SizedBox(
@@ -406,7 +409,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => setState(() => Cards.add(create_card())),
+        onPressed: () => setState(() => cards.add(createCard())),
       ),
     );
   }

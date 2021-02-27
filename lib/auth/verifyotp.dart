@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:code_fields/code_fields.dart';
 import 'package:vrst/dbhelper.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
+// import 'dart:io';
 import 'package:vrst/common/global.dart' as global;
 
 class Verifyotp extends StatefulWidget {
@@ -20,7 +20,7 @@ class VerifyotpState extends State<Verifyotp> {
   final dbhelper = Databasehelper.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final int codeLength = 4;
-  String _OTP;
+  String _otp;
 
   String validateCode(String code){
     if(code.length < codeLength) return "Please complete the code";
@@ -38,8 +38,8 @@ class VerifyotpState extends State<Verifyotp> {
 
       String url = global.baseUrl+'login-otp';
       print(url);
-      Map<String, String> headers = {"Content-type": "application/json"};
-      http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_OTP});
+      //Map<String, String> headers = {"Content-type": "application/json"};
+      http.Response response = await http.post(url,body:{'contact':global.contactNo,'otp':_otp});
       int statusCode = response.statusCode;
       print(statusCode);
       if(statusCode == 200){
@@ -112,9 +112,7 @@ class VerifyotpState extends State<Verifyotp> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      // onWillPop: _onWillPop,
-      child: Scaffold(
+    return Scaffold(
               body: loader ? Container(
               child: Center(
                 child: Column(
@@ -164,7 +162,7 @@ class VerifyotpState extends State<Verifyotp> {
                                       validator: validateCode,
                                       onChanged: (value){
                                         setState(() {
-                                          _OTP = value;
+                                          _otp = value;
                                         });
                                       },
                                       inputDecoration: InputDecoration(
@@ -206,7 +204,6 @@ class VerifyotpState extends State<Verifyotp> {
                   ),
                 ),
             )
-      ),
-    );
+      );
   }
 }

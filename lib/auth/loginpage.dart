@@ -44,7 +44,7 @@ class LoginPageState extends State<LoginPage> {
       _formKey.currentState.save(); // Save our form now.
 
       String url = global.baseUrl+'login';
-      Map<String, String> headers = {"Content-type": "application/json"};
+      //Map<String, String> headers = {"Content-type": "application/json"};
       http.Response response = await http.post(url,body:{'contact':_data.contactno,'user_type':_data.userType,'password':_data.password});
       int statusCode = response.statusCode;
       if(statusCode == 200){
