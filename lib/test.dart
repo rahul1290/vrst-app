@@ -206,7 +206,7 @@ class _TestState extends State<Test> {
   String _qty;
   String stateInfoUrl = 'http://www.vnrdev.in/vrst/api/get-cropList/';
 
-  Future<String> _getStateList() async {
+  Future <void> _getStateList() async {
     await http.get(stateInfoUrl, headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }).then((response) {
@@ -222,7 +222,7 @@ class _TestState extends State<Test> {
   String _cropVarietyValue;
 
 
-  Future<String> _getCitiesList(String cropId) async {
+  Future<void> _getCitiesList(String cropId) async {
     String cityInfoUrl =
         'http://www.vnrdev.in/vrst/api/get-cropvariety/'+ cropId;
     await http.get(cityInfoUrl, headers: {

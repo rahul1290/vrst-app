@@ -257,6 +257,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
   }
 
   _imgFromGallery() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
 
@@ -267,6 +268,7 @@ class _BillEntryFormState extends State<BillEntryForm> {
   }
 
   _imgFromCamera() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50);
 

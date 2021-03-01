@@ -12,7 +12,7 @@ class _DrawerPageState extends State<DrawerPage> {
 final dbhelper = Databasehelper.instance;
 String _uname = '';
 String _uemail = '';
-String _uimage = '';
+//String _uimage = '';
 
 
 @override
@@ -27,7 +27,7 @@ void fetchData() async{
   setState(() {
     _uname = userData[0]['name'];
     _uemail = userData[0]['contact'];
-    _uimage = userData[0]['image'];
+    //_uimage = userData[0]['image'];
   });
 }
 
@@ -79,7 +79,7 @@ Future<void> logout() async {
             currentAccountPicture: ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
               child: Image.network(
-                global.baseUrl + '../assets/images/userprofile/'+ _uimage +'.jpg',
+                global.baseUrl + '../assets/images/userprofile/15.jpg',
                 height: 150.0,
                 width: 150.0,
 

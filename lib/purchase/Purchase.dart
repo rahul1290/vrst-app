@@ -63,6 +63,7 @@ class _PurchaseState extends State<Purchase> {
   }
 
   _imgFromCamera() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50);
 
@@ -72,6 +73,7 @@ class _PurchaseState extends State<Purchase> {
   }
 
   _imgFromGallery() async {
+    // ignore: deprecated_member_use
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50);
 

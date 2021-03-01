@@ -64,11 +64,17 @@ class _DashboardState extends State<Dashboard> {
     List<dynamic> userdetail = await dbhelper.get(1);
     Map<String, String> headers = { "Content-type": "application/x-www-form-urlencoded","vrstKey": userdetail[0]['key'] };
     String url = global.baseUrl + 'all-scheme/' + userdetail[0]['state'];
+    print(url);
     http.Response resposne = await http.get(url,headers: headers);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
         _schemes = jsonDecode(resposne.body);
+        loader = false;
+      });
+    } else {
+      print('else');
+      setState(() {
         loader = false;
       });
     }
@@ -96,7 +102,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           //child: CircularProgressIndicator(),
-        ) : ListView.builder(
+        ) : _schemes.length > 0 ? ListView.builder(
           itemCount: _schemes.length,
           itemBuilder: (context, index) {
             return Padding(
@@ -186,6 +192,8 @@ class _DashboardState extends State<Dashboard> {
               ),
             );
           },
+        ) : Center(
+          child: Text('No scheme available.'),
         ),
       ),
     );
