@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'chart.dart';
 import 'file:///D:/flutter_projects/vrst/lib/auth/register.dart';
 import 'package:vrst/auth/loginpage.dart';
 import 'package:vrst/auth/login_with_otp.dart';
@@ -9,7 +10,8 @@ import 'package:vrst/dashboard.dart';
 import 'package:vrst/dbhelper.dart';
 import 'package:vrst/purchase/OrderList.dart';
 import 'package:vrst/purchase/Purchase.dart';
-import 'file:///D:/flutter_projects/vrst/lib/purchase/returnorder.dart';
+import 'package:vrst/returnOrder/returnList.dart';
+import 'package:vrst/returnOrder/returnorder.dart';
 import 'package:vrst/purchase/billEntryForm.dart';
 import 'package:vrst/auth/profile.dart';
 import 'package:vrst/test.dart';
@@ -40,7 +42,9 @@ class MyApp extends StatelessWidget {
         '/billEntryForm' : (context) => BillEntryForm(),
         '/profile' : (context) => Profilepage(),
         '/orderList' : (context) => OrderList(),
+        '/returnlist' : (context) => Returnlist(),
         '/Test' : (context) => Test(),
+        '/chart' : (context) => Chart(),
       },
     );
   }

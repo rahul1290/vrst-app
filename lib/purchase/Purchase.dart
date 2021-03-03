@@ -1,15 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:vrst/common/drawer.dart';
 import 'package:vrst/common/global.dart' as global;
+import 'package:vrst/dbhelper.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:async';
-import 'dart:core';
 import 'dart:convert';
-import 'dart:io';
-import 'package:vrst/purchase/billEntryForm.dart';
 
 class Purchase extends StatefulWidget {
   @override
@@ -17,333 +11,281 @@ class Purchase extends StatefulWidget {
 }
 
 class _PurchaseState extends State<Purchase> {
-  final _formKey = GlobalKey<FormState>();
-  String stateDropdownValue = 'Select State';
-  String distributorDropdownValue = 'Select Distributor';
-  String billDate;
-  TextEditingController _billDate;
-  List _states = List();
-  List _distributor = List();
+ final _formKey = GlobalKey<FormState>();
+  final dbhelper = Databasehelper.instance;
+  
+  String _myCrop;
+  String _qty;
+  List _cropList;
+  String _myCropVariety;
+  List _cropVarietyList = [];
+  List billEntries = [];
+  List billEntriesDisplay;
 
-  TextEditingController _billController;
-  //static List<String> friendsList = [null];
+  String _cropstring;
+  String _cropvarietystring;
+  String _cropqutstring;
 
-  File _image;
-  final picker = ImagePicker();
+  bool loader = false;
 
   void initState() {
-    _getstates();
-    _getdistributors();
-    _billDate = TextEditingController();
     super.initState();
+    _getCrops();
   }
 
-  void _getstates() async{
-    String url = global.baseUrl + 'get-states';
-    http.Response resposne = await http.get(url);
+//////////////////////////////// getCrop //////////////////////////////////////////
+  void _getCrops() async {
+    setState(() {
+      loader = true;
+      _cropVarietyList = [];
+    });
+    List<dynamic> userdetail = await dbhelper.get(1);
+    Map<String, String> headers = { "Content-type": "application/x-www-form-urlencoded","vrstKey": userdetail[0]['key'] };
+    String url = global.baseUrl + 'get-cropList';
+    http.Response resposne = await http.get(url,headers: headers);
     int statusCode = resposne.statusCode;
-    if(statusCode == 200){
+    if (statusCode == 200) {
+      setState(() { 
+        var data = jsonDecode(resposne.body);
+        _cropList = data['crops'];
+        print(_cropList);
+        loader = false;
+      });
+    } else {
       setState(() {
-        _states = jsonDecode(resposne.body);
-        stateDropdownValue = _states[0]['state_code'];
+        loader = false;
       });
     }
   }
 
-  void _getdistributors() async{
-    String url = global.baseUrl + 'get-distributors';
-    http.Response resposne = await http.get(url);
+  //////////////////////////////// getCropVariety //////////////////////////////////////////
+  void _getCropVariety(String cropId) async {
+    setState(() {
+      loader = true;
+      _myCropVariety = '0';
+    });
+    List<dynamic> userdetail = await dbhelper.get(1);
+    Map<String, String> headers = { "Content-type": "application/x-www-form-urlencoded","vrstKey": userdetail[0]['key'] };
+    String url = global.baseUrl + 'get-cropvariety/'+ cropId;
+    print(url);
+    http.Response resposne = await http.get(url,headers: headers);
     int statusCode = resposne.statusCode;
-    if(statusCode == 200){
+    if (statusCode == 200) {
       setState(() {
-        _distributor = jsonDecode(resposne.body);
-        distributorDropdownValue = _distributor[0]['DealerId'];
+         
+        var data = jsonDecode(resposne.body);
+        _cropVarietyList = data['varieties'];
+        print(_cropVarietyList);
+        loader = false;
+      });
+    } else {
+      print('else');
+      setState(() {
+        loader = false;
       });
     }
   }
 
-  _imgFromCamera() async {
-    // ignore: deprecated_member_use
-    File image = await ImagePicker.pickImage(
-        source: ImageSource.camera, imageQuality: 50);
-
-    setState(() {
-      _image = image;
-    });
-  }
-
-  _imgFromGallery() async {
-    // ignore: deprecated_member_use
-    File image = await ImagePicker.pickImage(
-        source: ImageSource.gallery, imageQuality: 50);
-
-    setState(() {
-      _image = image;
-    });
-  }
-
-  void _showPicker(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
-                    onTap: () {
-                      _imgFromCamera();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
-  @override
-  void dispose() {
-    _billController.dispose();
-    super.dispose();
-  }
-
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  void _submit() {
-    if (this._formKey.currentState.validate()) {
-      _formKey.currentState.save();
-      _purchaseSuccess();
-    }
-  }
-
-  Future<void> _purchaseSuccess() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Purchase Success!',textAlign: TextAlign.center,),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('You successfully Submit the purchase order.',textAlign: TextAlign.center,),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                //Navigator.of(context).pop();
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/dashboard');
-                setState(() {
-                  //loader = false;
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _billDateWidget() {
-    return TextFormField(
-      controller: _billDate,
-      readOnly: true,
-      decoration: InputDecoration(
-          labelText: 'Select Date',
-          suffixIcon: GestureDetector(
-            onTap: () => {
-              showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2021, 2),
-                lastDate: DateTime(2022, 12),
-              ).then((selectedDate) {
-                if (selectedDate != null) {
-                  final DateTime now = selectedDate;
-                  final DateFormat formatter = DateFormat('dd/MM/yyyy');
-                  final String formatted = formatter.format(now);
-                  setState(() {
-                    _billDate.text = formatted;
-                    print(formatted);
-                  });
-                }
-              })
-            },
-            child: Icon(Icons.calendar_today),
-          )),
-      onSaved: (String value) {
-        billDate = value;
-      },
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Select date';
-        } else {
-          return null;
-        }
-      },
-    );
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('PURCHASE ORDER'),
+        title: Text('Bill Entry'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      drawer: DrawerPage(),
+      body: loader ? Container(
         child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 15,
-                ),
-                Card(
-                  elevation: 10,
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DropdownButtonFormField(
-                            hint: Text('Select Distributor'),
-                            items: _distributor.map((item) {
-                              return DropdownMenuItem<String>(
-                                value: item['DealerId'].toString(),
-                                child: Text(item['DealerName']),
-                              );
-                            }).toList(),
-                            onChanged: (String newValue) {
-                              setState(() {
-                                distributorDropdownValue = newValue;
-                              });
-                            },
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: 'Enter Bill Number',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide(
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                          validator: (value){
-                            if(value.isEmpty){
-                              return 'Please enter Bill no.';
-                            } else {
-                              return null;
-                            }
-                          },
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Expanded(
-                              child: new Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: _billDateWidget(),
-                              ),
-                            ),
-                            Expanded(
-                              child: new Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    _showPicker(context);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 45,
-                                    backgroundColor: Color(0xffFDCF09),
-                                    child: _image != null
-                                        ? ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(50),
-                                            child: Image.file(
-                                              _image,
-                                              width: 100,
-                                              height: 300,
-                                              fit: BoxFit.fitHeight,
-                                            ),
-                                          )
-                                        : Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.grey[200],
-                                                borderRadius:
-                                                    BorderRadius.circular(50)),
-                                            width: 100,
-                                            height: 300,
-                                            child: Icon(
-                                              Icons.camera_alt,
-                                              color: Colors.grey[800],
-                                            ),
-                                          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              CircularProgressIndicator(),
+              SizedBox(height: 15.0,),
+              Text('  Loading...',style: TextStyle(color: Colors.redAccent,fontWeight: FontWeight.bold,),),
+            ],
+          ),
+        ),
+        //child: CircularProgressIndicator(),
+      ) : 
+        Container(
+          child: Column(
+            children: [
+                Container(
+                  child: Table(
+                            border: TableBorder.all(width: 1.0, color: Colors.black),
+                            children: [
+                              for (var video in billEntries) TableRow(children: [
+                                TableCell(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                      Text('crop'),
+                                       
+                                      Text(video['variety'].toString())
+                                    ],
                                   ),
+                                )
+                              ])
+                            ]
+                          ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.only(left: 15, right: 15, top: 5),
+                      color: Colors.white,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            child: DropdownButtonHideUnderline(
+                              child: ButtonTheme(
+                                alignedDropdown: true,
+                                child: DropdownButton<String>(
+                                  value: _myCrop,
+                                  icon: (null),
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 16,
+                                  ),
+                                  hint: Text('Select Crop'),
+                                  onChanged: (String newValue) {
+                                    setState(() {
+                                      _myCrop = newValue;
+                                      _getCropVariety(_myCrop);
+                                      print(_myCrop);
+                                    });
+                                  },
+                                  items: _cropList?.map((item) {
+                                        return new DropdownMenuItem(
+                                          child: new Text(item['CropName']),
+                                          value: item['CropId'].toString(),
+                                        );
+                                      })?.toList() ??
+                                      [],
                                 ),
                               ),
                             ),
-                            Divider(
-                                color: Colors.black,
-                                height: 2.0,
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-
-                        BillEntryForm(),
-
-                        RaisedButton(
-                            color: Colors.lightGreen,
-                            splashColor: Colors.red,
-                            child: Text(
-                              'SUBMIT',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                            onPressed: _submit),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 15, right: 15, top: 5),
+                      color: Colors.white,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Expanded(
+                            child: DropdownButtonHideUnderline(
+                              child: ButtonTheme(
+                                alignedDropdown: true,
+                                child: DropdownButton<String>(
+                                  value: _myCropVariety,
+                                  iconSize: 30,
+                                  icon: (null),
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 16,
+                                  ),
+                                  hint: Text('Select crop variety'),
+                                  onChanged: (String newValue) {
+                                    setState(() {
+                                      _myCropVariety = newValue;
+                                      print(_myCropVariety);
+                                    });
+                                  },
+                                  items: _cropVarietyList.length > 0 ? _cropVarietyList?.map((item) {
+                                        return new DropdownMenuItem(
+                                          child: new Text(item['ProductName']),
+                                          value: item['ProductId'].toString(),
+                                        );
+                                      })?.toList() ??
+                                      [] : [],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    
+                    Container(
+                      padding: EdgeInsets.only(left: 15, right: 15, top: 5),
+                      color: Colors.white,
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Qty(gm)',
+                          //icon: Icon(Icons.place,color:Colors.grey,),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide(
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                        onChanged: (String val){
+                          setState(() {
+                            _qty = val;
+                          });
+                        },
+                        validator: (value){
+                          return null;
+                        },
+                      ),
+                    ),
+
+                    RaisedButton(
+                      child: Text('Entry Submitted'),
+                      onPressed: (){
+                        if (this._formKey.currentState.validate()) {
+                          _formKey.currentState.save();
+                          setState(() {
+                            _formKey.currentState.reset();  
+
+                            billEntries.add({'crop':_myCrop,'variety':_myCropVariety,'qty':_qty});
+                            
+                            String tempCrop;  
+                            String tempVariety;
+
+                            for(int i=0;i<_cropList.length; i++){
+                              if(_cropList[i]['CropId'] == _myCrop){
+                                tempCrop = _cropList[i]['CropName'];
+                              }
+                            }
+                            for(int j=0;j<_cropVarietyList.length; j++){
+                              if(_cropVarietyList[j]['ProductId'] == _myCropVariety){
+                                tempVariety = _cropVarietyList[j]['ProductName'];
+                              }
+                            }
+                            
+                            billEntriesDisplay.add({'crop':tempCrop,'variety':tempVariety,'qty':'123'});
+                            print(billEntriesDisplay);
+
+                          });
+                        } else {
+                          print('form validation error');
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
-      ),
+      
+      
     );
   }
 }

@@ -104,11 +104,13 @@ Future<void> logout() async {
             //trailing: Icon(Icons.arrow_forward_ios),
             onTap: (){
               Navigator.pushReplacementNamed(context, "/dashboard");
+              //Navigator.pushReplacementNamed(context, "/purchase");
+              
             },
           ),
           ListTile(
             leading: Icon(Icons.add_shopping_cart_outlined,color: Colors.green,),
-            title: Text('Purchase Order'),
+            title: Text('New Order'),
             onTap: (){
               Navigator.pushNamed(context, '/billEntryForm');
               //Navigator.pushNamed(context, '/Test');
@@ -116,11 +118,29 @@ Future<void> logout() async {
             },
           ),
           ListTile(
-            leading: Icon(Icons.add_shopping_cart_outlined,color: Colors.green,),
-            title: Text('OrderList'),
+            leading: Icon(Icons.shopping_bag_outlined,color: Colors.purpleAccent,),
+            title: Text('My Order\'s'),
             onTap: (){
               Navigator.pushNamed(context, '/orderList');
               //Navigator.pushNamed(context, '/Test');
+            },
+          ),
+
+          ListTile(
+            leading: Icon(Icons.assignment_return,color: Colors.red,),
+            title: Text('Return order\'s'),
+            onTap: (){
+              Navigator.pushNamed(context, '/returnlist');
+
+            },
+          ),
+
+          ListTile(
+            leading: Icon(Icons.auto_stories,color: Colors.blueAccent,),
+            title: Text('Purchase Report'),
+            onTap: (){
+              //Navigator.pushNamed(context, '/returnlist');
+              Navigator.pushNamed(context, '/chart');
             },
           ),
 

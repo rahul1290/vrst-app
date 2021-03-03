@@ -79,9 +79,9 @@ class _BillEntryFormState extends State<BillEntryForm> {
   void _submit() async {
     if (this._formKey.currentState.validate()) {
       _formKey.currentState.save();
-      // setState(() {
-      //   loader = true;
-      // });
+      setState(() {
+        loader = true;
+      });
       List entries = await dbhelper.getallentries();
       List<dynamic> userdetail = await dbhelper.get(1);
       String url = global.baseUrl + "Purchase_ctrl/purchaseOrder";

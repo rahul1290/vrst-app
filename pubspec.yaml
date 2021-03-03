@@ -39,6 +39,7 @@ dependencies:
   json_table: ^1.4.0
   flutter_html: ^1.2.0
   blinking_text: ^0.0.4+1
+  syncfusion_flutter_charts: ^18.4.46
 
 dev_dependencies:
   flutter_test:

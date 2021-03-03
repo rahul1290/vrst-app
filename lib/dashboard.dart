@@ -106,7 +106,7 @@ class _DashboardState extends State<Dashboard> {
           itemCount: _schemes.length,
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.only(top:4.0),
+              padding: const EdgeInsets.all(10.0),
               child: Card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +125,8 @@ class _DashboardState extends State<Dashboard> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SingleChildScrollView(
+                            
+                            _schemes[index]['claim'] != null ? SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -141,26 +142,28 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               ],
                             ),
-                            ),
+                            ) : Text(''),
                             
                             SizedBox(height: 6.0,),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text('Next to Close : ',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-                                BlinkText(
-                                _schemes[index]['next'].toString().toUpperCase(),
-                                style: TextStyle(fontSize: 16.0, color: Colors.red),
-                                beginColor: Colors.black,
-                                endColor: Colors.red,
-                                times: 10,
-                                duration: Duration(seconds: 1),
+                            _schemes[index]['next'] != null ?
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text('Next to Close : ',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
+                                  BlinkText(
+                                  _schemes[index]['next'].toString().toUpperCase(),
+                                  style: TextStyle(fontSize: 16.0, color: Colors.red),
+                                  beginColor: Colors.black,
+                                  endColor: Colors.red,
+                                  times: 10,
+                                  duration: Duration(seconds: 1),
+                                ),
+                                ],
                               ),
-                              ],
-                            ),
-                            ),
+                              ) : Text(''),
+                            
                             
                           ],
                         ), 
