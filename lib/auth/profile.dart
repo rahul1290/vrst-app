@@ -11,6 +11,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 // import 'package:intl/intl.dart';
 import 'package:vrst/dbhelper.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:math';
 
 class Profilepage extends StatefulWidget {
   @override
@@ -55,10 +57,26 @@ class _ProfilepageState extends State<Profilepage> {
       setState(() {
         loader = false;
         _userDetail = jsonDecode(response.body);
-        profilePic = global.baseUrl+'../assets/images/userprofile/'+ userdetail[0]['image'].toString() +'.jpg';
+        urlToFile(global.baseUrl+'../assets/images/userprofile/'+ userdetail[0]['image'].toString() +'.jpg');
       });
     }
   }
+
+  
+  Future<File> urlToFile(String imageUrl) async {
+    var rng = new Random();
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File file = new File('$tempPath'+ (rng.nextInt(100)).toString() +'.png');
+    http.Response response = await http.get(imageUrl);
+    await file.writeAsBytes(response.bodyBytes);
+    if(response.statusCode == 200){
+      setState(() {
+        _data._image = file;
+      });
+    }
+    return file;
+    }
 
   void _showPicker(context) {
     showModalBottomSheet(
@@ -152,7 +170,7 @@ class _ProfilepageState extends State<Profilepage> {
             FlatButton(
               child: Text('Ok'),
               onPressed: () {
-                Navigator.pushNamed(context, '/orderList');
+                Navigator.pushNamed(context, '/dashboard');
               },
             ),
           ],
@@ -207,11 +225,12 @@ class _ProfilepageState extends State<Profilepage> {
                                 },
                                 child: CircleAvatar(
                                   radius: 75,
-                                  backgroundColor: Color(0xffFDCF09),
+                                  backgroundColor: Colors.grey,
+                                  
                                   child: _data._image != null
                                       ? ClipRRect(
                                           borderRadius:
-                                              BorderRadius.circular(100),
+                                          BorderRadius.circular(100),
                                           child: Image.file(
                                             _data._image,
                                             width: 300,

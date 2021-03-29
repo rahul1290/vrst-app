@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "793142971391",
+    "project_id": "vrst-app",
+    "storage_bucket": "vrst-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793142971391:android:7a6b5cac91124a42fdb5ca",
+        "android_client_info": {
+          "package_name": "com.example.vrst"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "793142971391-0lgnbl34q4gct1alctmh79c7qfc5ca7t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZn1DWAvv9QJ54iyRSS51Zfa8DQ7mFqq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "793142971391-0lgnbl34q4gct1alctmh79c7qfc5ca7t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

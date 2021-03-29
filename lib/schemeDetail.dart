@@ -79,13 +79,21 @@ class _SchemeDetailState extends State<SchemeDetail> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text('Lifting Period'),
-                            Text('01-04-2019 to 31-03-2020',
-                                style: TextStyle(color: Colors.redAccent),
-                            ),
+                            RichText(
+                                text: TextSpan(
+                                  text: _schemesDetail['scheme'][0]['from_date'],
+                                  style: TextStyle(color: Colors.black),
+                                  children: <TextSpan>[
+                                    TextSpan(text: ' to ', style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red)),
+                                    TextSpan(text: _schemesDetail['scheme'][0]['to_date']),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                         SizedBox(height: 10.0,),
-                        JsonTable(
+                        Container(
+                          child: JsonTable(
                           _schemesDetail['schemeDetail'],
                           tableHeaderBuilder: (String header) {
                             return Container(
@@ -117,6 +125,8 @@ class _SchemeDetailState extends State<SchemeDetail> {
                             );
                           },
                         ),
+                        ),
+                        
                         SizedBox(height: 10.0,),
                         Html(
                           data: _schemesDetail['scheme'][0]['instruction'],

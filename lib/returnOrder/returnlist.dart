@@ -6,8 +6,6 @@ import 'package:vrst/common/drawer.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vrst/dbhelper.dart';
-// import 'package:vrst/schemeDetail.dart';
-// import 'package:blinking_text/blinking_text.dart';
 
 class Returnlist extends StatefulWidget {
   @override
@@ -91,7 +89,11 @@ class _ReturnlistState extends State<Returnlist> {
                       TableRow( children: [  
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:[Text('CropName', style: TextStyle(fontSize: 18.0))]),  
+                          children:[
+                            Icon(Icons.add),
+                            Text('CropName', style: TextStyle(fontSize: 18.0))
+                            ]
+                          ),  
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children:[Text(': '+_returnList[index]['CropName'])]), 

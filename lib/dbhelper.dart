@@ -14,6 +14,7 @@ class Databasehelper {
   static final columnContact = 'contact';
   static final columnkey = 'key';
   static final columnimage = 'image';
+  static final columnfirebasekey = 'firebase';
 
   static final table1 = "billEntries";
   static final columnId = 'id';
@@ -39,7 +40,7 @@ class Databasehelper {
   }
 
   Future _onCreate(Database db,int version) async{
-    await db.execute("CREATE TABLE $table($columnID INTEGER PRIMARY KEY,$columnName TEXT NOT NULL,$columnState TEXT NOT NULL,$columnContact VARCHAR(11) NOT NULL,$columnkey TEXT NOT NULL,$columnimage TEXT NOT NULL)");
+    await db.execute("CREATE TABLE $table($columnID INTEGER PRIMARY KEY,$columnName TEXT NOT NULL,$columnState TEXT NOT NULL,$columnContact VARCHAR(11) NOT NULL,$columnkey TEXT NOT NULL,$columnimage TEXT NOT NULL,$columnfirebasekey TEXT)");
     await db.execute("CREATE TABLE $table1($columnId INTEGER PRIMARY KEY,$columnCrop INTEGER NOT NULL,$columnVariety INTEGER NOT NULL,$columnQty INTEGER NOT NULL)");
   }
 
@@ -79,7 +80,7 @@ class Databasehelper {
 
   Future<List>getall() async {
     Database db = await instance.databse;
-    return await db.query(table, columns: [columnID,columnName,columnState,columnContact,columnkey,columnimage]);
+    return await db.query(table, columns: [columnID,columnName,columnState,columnContact,columnkey,columnimage,columnfirebasekey]);
   }
 
   Future<List>get(int id) async {

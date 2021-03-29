@@ -11,9 +11,8 @@ class Chart extends StatefulWidget {
   _ChartState createState() => _ChartState();
 }
 
-
 class _ChartState extends State<Chart> {
-final dbhelper = Databasehelper.instance;
+  final dbhelper = Databasehelper.instance;
 
   List _chartData;
   bool loader;
@@ -24,16 +23,18 @@ final dbhelper = Databasehelper.instance;
     _getChartData();
   }
 
-
-  void _getChartData() async {
+  Future _getChartData() async {
     setState(() {
-        loader = true;
-      });
+      loader = true;
+    });
     List<dynamic> userdetail = await dbhelper.get(1);
-    Map<String, String> headers = { "Content-type": "application/x-www-form-urlencoded","vrstKey": userdetail[0]['key'] };
+    Map<String, String> headers = {
+      "Content-type": "application/x-www-form-urlencoded",
+      "vrstKey": userdetail[0]['key']
+    };
     String url = global.baseUrl + 'Purchase_ctrl/purchase_report/';
     print(url);
-    http.Response resposne = await http.get(url,headers: headers);
+    http.Response resposne = await http.get(url, headers: headers);
     int statusCode = resposne.statusCode;
     if (statusCode == 200) {
       setState(() {
@@ -51,40 +52,49 @@ final dbhelper = Databasehelper.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Order Summary'),
-          centerTitle: true,
-        ),
-        drawer: DrawerPage(),
-        body: loader ? Container(
+      appBar: AppBar(
+        title: Text('Order Summary'),
+        centerTitle: true,
+      ),
+      drawer: DrawerPage(),
+      body: loader
+          ? Container(
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     CircularProgressIndicator(),
-                    SizedBox(height: 15.0,),
-                    Text('  Loading...',style: TextStyle(color: Colors.redAccent,fontWeight: FontWeight.bold,),),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Text(
+                      '  Loading...',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
               //child: CircularProgressIndicator(),
-            ) : Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
+            )
+          : Center(
+              child: RefreshIndicator(
+                onRefresh: _getChartData,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        JsonTable(
-                          _chartData
-                        ),
+                        JsonTable(_chartData, showColumnToggle: true),
                       ],
                     ),
-                    
-        ),
+                  ),
+                ),
               ),
             ),
-            
     );
   }
 }

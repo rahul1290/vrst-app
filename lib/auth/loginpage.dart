@@ -2,14 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vrst/dbhelper.dart';
-//import 'package:sqflite/sqflite.dart';
 import 'package:http/http.dart' as http;
 import 'package:vrst/common/global.dart' as global;
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class LoginPage extends StatefulWidget {
-  @override
+
+@override
     LoginPageState createState() {
     return LoginPageState();
   }
@@ -21,7 +22,21 @@ class _LoginData{
   String userType = 'Retailer';
 }
 bool loader = false;
+
 class LoginPageState extends State<LoginPage> {
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _firebaseKey;
+
+  _registerOnFirebase() {
+    _firebaseMessaging.subscribeToTopic('all');
+    _firebaseMessaging.getToken().then((token) => {
+      setState((){
+        _firebaseKey = token;
+      }),
+    });
+  }
+
   final dbhelper = Databasehelper.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   _LoginData _data = new _LoginData();
@@ -34,6 +49,7 @@ class LoginPageState extends State<LoginPage> {
   void initState() {
     loader = false;
     super.initState();
+    _registerOnFirebase();
   }
 
   void _submit() async {
@@ -41,11 +57,10 @@ class LoginPageState extends State<LoginPage> {
       loader = true;
     });
     if (this._formKey.currentState.validate()) {
-      _formKey.currentState.save(); // Save our form now.
+      _formKey.currentState.save(); 
 
       String url = global.baseUrl+'login';
-      //Map<String, String> headers = {"Content-type": "application/json"};
-      http.Response response = await http.post(url,body:{'contact':_data.contactno,'user_type':_data.userType,'password':_data.password});
+      http.Response response = await http.post(url,body:{'contact':_data.contactno,'user_type':_data.userType,'password':_data.password,'firebaseKey':_firebaseKey});
       int statusCode = response.statusCode;
       if(statusCode == 200){
           Map body = jsonDecode(response.body);
@@ -55,11 +70,13 @@ class LoginPageState extends State<LoginPage> {
             Databasehelper.columnState : body['state_id'],
             Databasehelper.columnkey : body['token'],
             Databasehelper.columnimage : body['user_id'],
+            Databasehelper.columnfirebasekey : _firebaseKey,
           };
           await dbhelper.insert(row);
           setState(() {
             loader = true;
           });
+          _registerOnFirebase();
           Navigator.pushNamed(context, '/dashboard');
       } else {
         _showMyDialog();

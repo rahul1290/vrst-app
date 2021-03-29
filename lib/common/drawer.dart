@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-//import 'dart:io';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'dart:math';
 import 'package:vrst/common/global.dart' as global;
 import 'package:vrst/dbhelper.dart';
+import 'package:http/http.dart' as http;
 
 class DrawerPage extends StatefulWidget {
   @override
@@ -12,24 +15,43 @@ class _DrawerPageState extends State<DrawerPage> {
 final dbhelper = Databasehelper.instance;
 String _uname = '';
 String _uemail = '';
-//String _uimage = '';
+String _uimage;
+File _image;
 
 
 @override
 // ignore: must_call_super
 void initState() {
   // TODO: implement initState
-  fetchData();
+  fetchData().then((value){
+    urlToFile();
+  });
 }
 
-void fetchData() async{
+Future fetchData() async{
   List userData = await dbhelper.getall();
+  print(userData);
   setState(() {
     _uname = userData[0]['name'];
     _uemail = userData[0]['contact'];
-    //_uimage = userData[0]['image'];
+    _uimage = userData[0]['image'];
   });
 }
+
+void urlToFile() async {
+    print(global.baseUrl+'../assets/images/userprofile/'+ _uimage +'.jpg');
+    var rng = new Random();
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File file = new File('$tempPath'+ (rng.nextInt(100)).toString() +'.png');
+    http.Response response = await http.get(global.baseUrl+'../assets/images/userprofile/'+ _uimage +'.jpg');
+    await file.writeAsBytes(response.bodyBytes);
+      if(response.statusCode == 200){
+        setState(() {
+          _image = file;
+        });
+      }
+    }
 
 Future<void> logout() async {
     return showDialog<void>(
@@ -78,12 +100,28 @@ Future<void> logout() async {
             accountEmail: Text(_uemail),
             currentAccountPicture: ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
-              child: Image.network(
-                global.baseUrl + '../assets/images/userprofile/15.jpg',
-                height: 150.0,
-                width: 150.0,
-
-              ),
+              child: _image != null ? ClipRRect(
+                        borderRadius:
+                        BorderRadius.circular(100),
+                        child: Image.file(
+                          _image,
+                          width: 300,
+                          height: 300,
+                          fit: BoxFit.fill,
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius:
+                                BorderRadius.circular(100)),
+                        width: 300,
+                        height: 300,
+                        child: Icon(
+                          Icons.add_a_photo,
+                          color: Colors.grey[800],
+                        ),
+                      ),
             ),
              otherAccountsPictures: <Widget>[
                GestureDetector(

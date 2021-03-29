@@ -68,9 +68,12 @@ class _OrderListState extends State<OrderList> {
                 child: Column(
                   children: [
                     ListTile(
-                      // leading: CircleAvatar(
-                      //   child: Text(_orders[index]['bill_no'].substring(0, 1)),
-                      // ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.cyan,
+                        child: Icon(
+                          Icons.shopping_cart_outlined,
+                        ),
+                      ),
                       //trailing: Icon(Icons.arrow_forward_ios_sharp),
                       title: Text("Bill No.: " + _orders[index]['bill_no']),
                       subtitle: Text("Distributor: "+ _orders[index]['DealerName'] + "\nOrder Date: "+ _orders[index]['created_at']+"\nStatus: "+_orders[index]['bill_status']),

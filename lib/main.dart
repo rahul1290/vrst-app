@@ -14,7 +14,6 @@ import 'package:vrst/returnOrder/returnList.dart';
 import 'package:vrst/returnOrder/returnorder.dart';
 import 'package:vrst/purchase/billEntryForm.dart';
 import 'package:vrst/auth/profile.dart';
-import 'package:vrst/test.dart';
 
 void main() => runApp(MyApp());
 
@@ -43,7 +42,6 @@ class MyApp extends StatelessWidget {
         '/profile' : (context) => Profilepage(),
         '/orderList' : (context) => OrderList(),
         '/returnlist' : (context) => Returnlist(),
-        '/Test' : (context) => Test(),
         '/chart' : (context) => Chart(),
       },
     );
